@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PitchTipsX · Member App</title>
+<meta name="description" content="PitchTipsX live tracked record: every pick logged, decimal odds, best UK price.">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root{--navy:#0a1628;--card:#12223a;--line:#1f3352;--lime:#c8ff00;--mute:#9fb0c8;--red:#ff5c6c}
+*{box-sizing:border-box}body{margin:0;background:var(--navy);color:#fff;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--navy);z-index:5}
+.wm{font-weight:900;font-size:22px;letter-spacing:-.5px}.wm span{color:var(--lime)}
+.cta{display:block;background:var(--lime);color:var(--navy);font-weight:800;text-decoration:none;padding:10px 14px;border-radius:10px;text-align:center}
+main{max-width:900px;margin:0 auto;padding:12px}
+.hero{margin:8px 0 14px}.hero .cta{font-size:17px;padding:14px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{display:block;font-size:22px}.stat small{color:var(--mute)}
+.pos{color:var(--lime)}.neg{color:var(--red)}
+nav{display:flex;gap:6px;margin:16px 0 10px;overflow-x:auto}nav button{flex:1;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 12px;font-weight:700;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--lime);color:var(--navy)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}select{flex:1;min-width:110px;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:8px}
+.tip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.tip.pending{border:2px solid var(--lime);box-shadow:0 0 0 3px rgba(200,255,0,.12)}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.meta{color:var(--mute);font-size:13px}
+.sel{font-weight:700;margin:4px 0}.odds{font-weight:800;color:var(--lime)}
+.pill{font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;background:#2a3a55}.pill.Won{background:var(--lime);color:var(--navy)}.pill.Lost{background:var(--red)}.pill.Pending{background:transparent;border:1px solid var(--lime);color:var(--lime)}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:14px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:600}
+.scroll{overflow-x:auto}.note{color:var(--mute);font-size:13px;margin:8px 0}a{color:var(--lime)}
+footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:24px}
+.hide{display:none}
+</style></head><body>
+<header><div class="wm">Pitch<span>Tips</span>X</div><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></header>
+<main>
+<div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
+<p class="note">Every pick logged, wins and losses. Decimal odds, flat stakes (1u = £5). Past results don't guarantee future returns.</p></div>
+<div class="stats" id="stats"><div class="stat"><small>Loading live record…</small></div></div>
+<p class="note" id="upd"></p>
+<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button></nav>
+<section id="feed"><div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select></div><div id="tips"></div></section>
+<section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
+<section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
+<section id="chal" class="hide"><p class="note">£10→£100 challenge: whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
+</main>
+<footer><p><a href="https://t.me/pitchtipsx">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX">@PitchTipsX</a></p>
+<p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
+<script>
+const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5;
+const url=t=>`https://docs.google.com/spreadsheets/d/${ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}&_=${Date.now()}`;
+const load=t=>new Promise((res,rej)=>Papa.parse(url(t),{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:rej}));
+const money=s=>{if(s==null)return NaN;s=String(s).replace(/[£,\s]/g,'');return s===''?NaN:parseFloat(s)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(n,d=2)=>(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(d);
+const cls=n=>n>0?'pos':n<0?'neg':'';
+const settled=r=>['Won','Lost','Void'].includes(r.result);
+let bets=[];
+function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
+function stats(){const a=agg(bets);document.getElementById('stats').innerHTML=`
+<div class="stat"><small>Record W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div>
+<div class="stat"><small>Profit/Loss</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b><small>${a.pl<0?'−':''}£${Math.abs(a.pl).toFixed(2)}</small></div>
+<div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
+<div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
+function opts(id,key,label){const vals=[...new Set(bets.map(r=>key==='result'?(r.result||'Pending'):r[key]).filter(Boolean))].sort();document.getElementById(id).innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join('');document.getElementById(id).onchange=feed}
+function feed(){const L=fl.value,M=fm.value,R=fr.value;const rows=bets.filter(r=>(!L||r.league===L)&&(!M||r.market===M)&&(!R||(r.result||'Pending')===R));
+document.getElementById('tips').innerHTML=rows.map(r=>{const res=r.result||'Pending',p=money(r.profit_loss);const link=(r.notes||'').match(/https:\/\/x\.com\/PitchTipsX\/status\/\d+/i);
+return `<div class="tip ${res==='Pending'?'pending':''}"><div class="row"><span class="meta">${esc(r.date)} · ${esc(r.kickoff_uk)} · ${esc(r.league)}</span><span class="pill ${res}">${res}</span></div>
+<div class="meta">${esc(r.match)} · ${esc(r.market)}</div><div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
+<div class="row meta"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span>${link?`<a href="${link[0]}" target="_blank" rel="noopener">View post</a>`:''}</div></div>`}).join('')||'<p class="note">No picks match.</p>'}
+function monday(d){const x=new Date(d+'T12:00:00Z');const k=(x.getUTCDay()+6)%7;x.setUTCDate(x.getUTCDate()-k);return x.toISOString().slice(0,10)}
+function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
+wt.innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!c.startsWith('_')&&!skip.includes(c)&&rows.some(r=>r[c]));
+el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','bank','chal'].forEach(s=>document.getElementById(s).classList.toggle('hide',s!==b.dataset.t))});
+(async()=>{try{const raw=await load('Bets');
+bets=raw.filter(r=>r.date&&r.selection&&!(String(r.posted).toLowerCase()==='email'&&!settled(r)));
+bets.sort((a,b)=>(b.date+(b.kickoff_uk||'')).localeCompare(a.date+(a.kickoff_uk||'')));
+stats();opts('fl','league','leagues');opts('fm','market','markets');opts('fr','result','results');feed();weeks();
+document.getElementById('upd').textContent='Live from the tracker sheet · loaded '+new Date().toLocaleString('en-GB',{timeZone:'Europe/London'})+' UK';
+}catch(e){document.getElementById('stats').innerHTML='<div class="stat"><small>Couldn\'t load the live record. Please refresh.</small></div>'}
+load('Bankroll').then(r=>table(bt,r)).catch(()=>{});
+load('Challenge').then(r=>table(ct,r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{});})();
+</script></body></html>
