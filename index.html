@@ -53,6 +53,10 @@ footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;bord
 h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;letter-spacing:1px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--lime);color:#000;font-weight:800;padding:10px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none}
 #toast.show{opacity:1}
+.fx-sub{display:flex;gap:6px;margin:0 0 10px}.fx-sub button{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:700;cursor:pointer}.fx-sub button.on{background:var(--lime);color:var(--navy)}
+.fxm{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:10px 12px;margin-bottom:6px}.fxm .t{font-weight:800}.fxday{color:var(--lime);font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px}
+.fxempty{background:#000;border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center}.fxerr{border-color:var(--red);color:#fff}
+.tokbox{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.tokbox input{flex:1;min-width:200px;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px}
 </style></head><body>
 
 <div id="toast"></div>
@@ -65,7 +69,7 @@ h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;l
 <section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"></div><div id="chartinfo">Tap or hover the line for details.</div></section>
 <section class="excl"><h2>Telegram exclusive record</h2><div id="excl"></div><a class="cta" style="display:block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join Telegram</a></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
-<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="how">How we bet</button></nav>
+<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="fix">Fixtures</button><button data-t="how">How we bet</button></nav>
 <section id="feed"><input class="search" id="q" type="search" placeholder="Search selection, match, league, market, notes…">
 <div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
 <div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"></div></section>
@@ -75,6 +79,7 @@ h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;l
 <section id="clv" class="hide"><div class="how"><h2 style="margin-top:0">Beat the closing price</h2><p class="note" style="color:#fff">Closing-line value (CLV) compares the price we posted with the best UK price just before kickoff. Beating the close regularly is the best sign a tipster finds value, whatever the short-term results.</p><div id="clvbody"><p class="note">Loading…</p></div></div></section>
 <section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
 <section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
+<section id="fix" class="hide"><div class="fx-sub"><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Data: football-data.org, fetched with your own free token. Times shown in your local time.</p></section>
 <section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
 <li><b>Decimal odds</b> on everything.</li>
 <li><b>Best UK price</b>, quoted with the bookmaker and the time it was checked.</li>
@@ -85,7 +90,9 @@ h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;l
 <li><b>Fun accas and bet builders</b> are just for fun. They're labelled as such and not tracked.</li>
 <li><b>Closing-line value (CLV)</b> is tracked to check whether we beat the closing price.</li>
 <li><b>No profit promises.</b> Betting carries risk. Only stake what you can afford to lose.</li>
-<li><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b></li></ul></div></section>
+<li><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b></li></ul>
+<h3>Fixtures tab: your football-data.org token</h3><p class="note" style="color:#fff">Get a free token at <a href="https://www.football-data.org/client/register" target="_blank" rel="noopener">football-data.org</a> (free tier: 10 calls/min). It's saved only in this browser.</p>
+<div class="tokbox"><input id="fdtok" type="password" placeholder="Paste your API token" autocomplete="off"><button class="btn" id="fdsave">Save</button><button class="btn" id="fdclear">Clear</button></div><p class="note" id="fdstat"></p></div></section>
 </main>
 <footer><p><a href="https://t.me/pitchtipsx">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX">@PitchTipsX</a></p>
 <p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
@@ -190,8 +197,42 @@ function deep(){const m=location.hash.match(/tip=(\d+)/);if(!m||deep.done===m[1]
 ['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';feed();document.querySelector('nav button[data-t=feed]').click();
 const el=document.querySelector(`#tips .tip[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash')}}
 window.addEventListener('hashchange',()=>{deep.done=null;deep()});
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','fix','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
 $('q').oninput=feed;
 fromCache();refresh();setInterval(refresh,90000);clvLoad();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script></body></html>
+</script>
+<script>
+(function(){
+const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/',K='pt_fd_token';let comp='PL',busy=false;
+const el=id=>document.getElementById(id),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tok=()=>{try{return localStorage.getItem(K)||''}catch(e){return ''}};
+function stat(){el('fdstat').textContent=tok()?'Token saved in this browser ✓':'No token saved.'}
+function goHow(){document.querySelector('nav button[data-t=how]').click();el('fdtok').focus()}
+function empty(msg,err){el('fxbody').innerHTML='<div class="fxempty'+(err?' fxerr':'')+'">'+msg+'</div>'}
+async function get(path){const r=await fetch(PX+path,{headers:{'X-Auth-Token':tok()}});
+ if(r.status===429){const w=r.headers.get('X-RequestCounter-Reset');throw new Error('Rate limit hit (10 calls/min on the free tier). Try again in '+(w?w+'s':'a minute')+'.')}
+ if(r.status===400||r.status===401||r.status===403)throw new Error('football-data.org rejected the token. Check it in <a href="#" data-gohow>How we bet</a>.');
+ if(!r.ok)throw new Error('Couldn\'t load data (error '+r.status+'). Try again shortly.');return r.json()}
+async function load(){if(busy)return;if(!tok()){empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
+ busy=true;empty('Loading…');
+ try{const [m,s]=await Promise.all([get(comp+'/matches?status=SCHEDULED,TIMED'),get(comp+'/standings')]);
+  const ms=(m.matches||[]).slice(0,20);let h='<h3>Upcoming matches</h3>',last='';
+  if(!ms.length)h+='<p class="note">No upcoming matches listed.</p>';
+  ms.forEach(x=>{const d=new Date(x.utcDate),day=d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});if(day!==last){h+='<div class="fxday">'+esc(day)+'</div>';last=day}
+   h+='<div class="fxm"><div class="row"><span class="t">'+esc(x.homeTeam?.shortName||x.homeTeam?.name)+' v '+esc(x.awayTeam?.shortName||x.awayTeam?.name)+'</span><span class="meta">'+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</span></div>'+(x.matchday?'<div class="meta">Matchday '+esc(x.matchday)+'</div>':'')+'</div>'});
+  const tb=((s.standings||[]).find(t=>t.type==='TOTAL')||{}).table||[];
+  h+='<h3>Standings (top 10)</h3>';
+  h+=tb.length?'<div class="scroll"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>'+tb.slice(0,10).map(r=>'<tr><td>'+r.position+'</td><td>'+esc(r.team?.shortName||r.team?.name)+'</td><td>'+r.playedGames+'</td><td>'+r.won+'</td><td>'+r.draw+'</td><td>'+r.lost+'</td><td>'+r.goalDifference+'</td><td><b>'+r.points+'</b></td></tr>').join('')+'</table></div>':'<p class="note">Standings not available.</p>';
+  el('fxbody').innerHTML=h}
+ catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false}}
+document.addEventListener('click',e=>{if(e.target.closest('[data-gohow]')){e.preventDefault();goHow()}});
+document.querySelectorAll('.fx-sub button[data-c]').forEach(b=>b.addEventListener('click',()=>{comp=b.dataset.c;document.querySelectorAll('.fx-sub button[data-c]').forEach(x=>x.classList.toggle('on',x===b));load()}));
+el('fxre').addEventListener('click',load);
+document.querySelector('nav button[data-t=fix]').addEventListener('click',load);
+el('fdsave').addEventListener('click',()=>{const v=el('fdtok').value.trim();if(!v)return;try{localStorage.setItem(K,v)}catch(e){}el('fdtok').value='';stat()});
+el('fdclear').addEventListener('click',()=>{try{localStorage.removeItem(K)}catch(e){}stat()});
+stat();
+})();
+</script>
+</body></html>
