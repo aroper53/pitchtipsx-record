@@ -2,6 +2,8 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
+<meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 :root{--navy:#0a1628;--card:#12223a;--line:#1f3352;--lime:#c8ff00;--mute:#9fb0c8;--red:#ff5c6c;--amber:#ffb020}
@@ -43,6 +45,12 @@ table{width:100%;border-collapse:collapse;background:var(--card);border-radius:1
 .track{height:12px;background:#1d2a3f;border-radius:6px;overflow:hidden;margin:6px 0}.fill{height:100%;background:var(--lime)}
 .how{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:14px 16px}.how li{margin:8px 0}
 footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}.panel h2{margin:0 0 6px;font-size:15px}
+#chart svg{width:100%;height:auto;display:block}#chartinfo{font-size:13px;color:var(--mute);min-height:18px}
+.excl{background:#000;border:2px solid var(--lime);border-radius:14px;padding:14px;margin:12px 0}.excl h2{margin:0 0 4px;font-size:15px;color:var(--lime);text-transform:uppercase;letter-spacing:1px}
+.excl .nums{display:flex;gap:16px;margin:8px 0 10px}.excl .nums b{display:block;font-size:22px}
+.tip.flash{animation:flash 2.4s ease 2}@keyframes flash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px var(--lime),0 0 24px rgba(200,255,0,.6)}}
+h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;letter-spacing:1px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--lime);color:#000;font-weight:800;padding:10px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none}
 #toast.show{opacity:1}
 </style></head><body>
@@ -54,13 +62,17 @@ footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;bord
 <p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results don't guarantee future returns.</p></div>
 <div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
 <div class="stats" id="stats"><div class="stat"><small>Loading live record…</small></div></div>
+<section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"></div><div id="chartinfo">Tap or hover the line for details.</div></section>
+<section class="excl"><h2>Telegram exclusive record</h2><div id="excl"></div><a class="cta" style="display:block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join Telegram</a></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
-<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="how">How we bet</button></nav>
+<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="how">How we bet</button></nav>
 <section id="feed"><input class="search" id="q" type="search" placeholder="Search selection, match, league, market, notes…">
 <div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
 <div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"></div></section>
 <section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
 <section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"></div><p class="note" id="mkother"></p></section>
+<section id="splits" class="hide"><h3>By league</h3><div class="scroll"><table id="lt"></table></div><h3>By month</h3><div class="scroll"><table id="mt"></table></div><p class="note">Settled picks only. Strike excludes voids; ROI = P/L ÷ total staked.</p></section>
+<section id="clv" class="hide"><div class="how"><h2 style="margin-top:0">Beat the closing price</h2><p class="note" style="color:#fff">Closing-line value (CLV) compares the price we posted with the best UK price just before kickoff. Beating the close regularly is the best sign a tipster finds value, whatever the short-term results.</p><div id="clvbody"><p class="note">Loading…</p></div></div></section>
 <section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
 <section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
 <section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
@@ -78,13 +90,16 @@ footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;bord
 <footer><p><a href="https://t.me/pitchtipsx">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX">@PitchTipsX</a></p>
 <p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
 <script>
-const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5,APP='https://aroper53.github.io/pitchtipsx-record/';
+const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5,BASE=location.origin+location.pathname.replace(/[^/]*$/,'');
 const $=id=>document.getElementById(id);
 const url=t=>`https://docs.google.com/spreadsheets/d/${ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}&_=${Date.now()}`;
+const parse=txt=>{const r=Papa.parse(txt,{header:true,skipEmptyLines:true});if(!r.data.length||r.meta.fields.length<2)throw new Error('empty');return r.data};
+const fetchTxt=t=>fetch(url(t),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
 const load=t=>new Promise((res,rej)=>Papa.parse(url(t),{download:true,header:true,skipEmptyLines:true,complete:r=>r.data&&r.data.length&&r.meta.fields.length>1?res(r.data):rej(new Error('empty')),error:rej}));
 const money=s=>{if(s==null)return NaN;s=String(s).replace(/[£,\s]/g,'');return s===''?NaN:parseFloat(s)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=(n,d=2)=>(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(d);
+const gbp=n=>(n<0?'−':'')+'£'+Math.abs(n).toFixed(2);
 const cls=n=>n>0?'pos':n<0?'neg':'';
 const settled=r=>['Won','Lost','Void'].includes(r.result);
 const resOf=r=>r.result||'Pending';
@@ -104,10 +119,10 @@ function stats(){const a=agg(bets);$('stats').innerHTML=`
 <div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
 function opts(id,fn,label){const el=$(id),cur=el.value;const vals=[...new Set(bets.map(fn).filter(Boolean))].sort();el.innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');el.onchange=feed}
 function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink(r);
-return `<div class="tip ${res==='Pending'?'pending':''}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}</span><span class="chip ${res}">${res}</span></div>
+return `<div class="tip ${res==='Pending'?'pending':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}</span><span class="chip ${res}">${res}</span></div>
 <div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
 <div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · KO ${esc(r.date)} ${koShort(r)}${bk?' · '+esc(bk):''}</div>
-<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View post</a>`:''}<button class="share" onclick="share(${i})">Share ↗</button></span></div></div>`}
+<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View post</a>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div></div>`}
 function feed(){const q=$('q').value.trim().toLowerCase(),L=fl.value,M=fm.value,R=fr.value,S=fs.value;
 view=bets.filter(r=>(!L||r.league===L)&&(!M||r.market===M)&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.league,r.market,r.notes].join(' ').toLowerCase().includes(q)));
 $('count').textContent=`${view.length} of ${bets.length} picks`;
@@ -124,7 +139,7 @@ $('mk').innerHTML=h;const o=s.filter(r=>cat(r)==='Other');$('mkother').textConte
 function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!skip.includes(c)&&rows.some(r=>r[c]));
 el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
-async function share(i){const r=bets[i],link=xlink(r)||APP;const text=`PitchTipsX pick: ${r.selection} @ ${r.odds} (${r.match}, ${r.league}) · ${resOf(r)}\n18+ | GambleAware`;
+async function share(id){const r=bets.find(x=>x._id===id);if(!r)return;const link=BASE+'tip/'+id+'.html';const text=`PitchTipsX pick: ${r.selection} @ ${r.odds} (${r.match}, ${r.league}) · ${resOf(r)}${xlink(r)?'\nX post: '+xlink(r):''}\n18+ | GambleAware`;
 if(navigator.share){try{await navigator.share({title:'PitchTipsX pick',text,url:link});return}catch(e){if(e.name==='AbortError')return}}
 try{await navigator.clipboard.writeText(text+'\n'+link);toast('Copied to clipboard')}catch(e){toast('Couldn\'t copy. Please copy manually.')}}
 function exportCsv(){const cols=['date','kickoff_uk','slip','match','league','market','selection','odds','stake','result','profit_loss','posted'];
@@ -132,14 +147,51 @@ const csv=Papa.unparse({fields:cols,data:view.map(r=>cols.map(c=>r[c]??''))});co
 let fails=0,lastOk=null;
 function setLive(){const el=$('live'),t=lastOk?lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}):'';el.className='live'+(fails===0?'':fails===1&&lastOk?' warn':' err');
 $('livetxt').textContent=fails===0?`Live · updated ${t} UK`:lastOk?`Update failed · last updated ${t} UK · retrying`:'Couldn\'t load the live record · retrying'}
-async function refresh(){try{const raw=await load('Bets');
+const CK='ptx_bets_csv_v1';
+function render(txt){const raw=parse(txt);raw.forEach((r,i)=>r._id=i+2);
 bets=raw.filter(r=>r.date&&r.selection&&!(String(r.posted).toLowerCase()==='email'&&!settled(r)));
-bets.sort((a,b)=>koKey(b).localeCompare(koKey(a)));
-stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>r.market,'markets');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();
-fails=0;lastOk=new Date()}catch(e){fails++}setLive();
+bets.sort((a,b)=>koKey(b).localeCompare(koKey(a))||b._id-a._id);
+stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>r.market,'markets');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();chart();excl();splits();deep()}
+function fromCache(){try{const c=JSON.parse(localStorage.getItem(CK)||'null');if(!c)return;render(c.txt);lastOk=new Date(c.t);fails=0;$('live').className='live warn';$('livetxt').textContent='Saved copy from '+lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'})+' UK · refreshing…'}catch(e){}}
+async function refresh(){try{const txt=await fetchTxt('Bets');render(txt);fails=0;lastOk=new Date();try{localStorage.setItem(CK,JSON.stringify({t:Date.now(),txt}))}catch(e){}}catch(e){fails++}setLive();
 load('Bankroll').then(r=>table(bt,r)).catch(()=>{});
 load('Challenge').then(r=>table(ct,r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{})}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','bank','chal','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
+function chart(){const s=bets.filter(settled).slice().sort((a,b)=>koKey(a).localeCompare(koKey(b))||a._id-b._id);const box=$('chart');
+if(!s.length){box.innerHTML='<p class="note">No settled picks yet.</p>';return}
+let cum=0;const pts=s.map(r=>{cum+=(money(r.profit_loss)||0)/UNIT;return{u:cum,r}});
+const W=640,H=220,P=30,ys=pts.map(p=>p.u).concat(0),mn=Math.min(...ys),mx=Math.max(...ys),rg=(mx-mn)||1;
+const X=i=>P+(W-2*P)*(pts.length<2?0.5:i/(pts.length-1)),Y=v=>10+(H-40)*(1-(v-mn)/rg);
+const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.u).toFixed(1)).join(' ');
+const last=pts[pts.length-1].u;
+box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative profit in units">
+<line x1="${P}" x2="${W-P}" y1="${Y(0)}" y2="${Y(0)}" stroke="#3a4d6b" stroke-dasharray="4 4"/>
+<text x="4" y="${Y(0)+4}" fill="#9fb0c8" font-size="11">0u</text><text x="4" y="${Y(mx)+4}" fill="#9fb0c8" font-size="11">${mx.toFixed(1)}</text><text x="4" y="${Y(mn)+4}" fill="#9fb0c8" font-size="11">${mn.toFixed(1)}</text>
+<path d="${d} L${X(pts.length-1)} ${Y(mn)} L${X(0)} ${Y(mn)} Z" fill="rgba(200,255,0,.08)"/><path d="${d}" fill="none" stroke="#c8ff00" stroke-width="2.5" stroke-linejoin="round"/>
+<text x="${P}" y="${H-6}" fill="#9fb0c8" font-size="11">${esc(pts[0].r.date)}</text><text x="${W-P}" y="${H-6}" fill="#9fb0c8" font-size="11" text-anchor="end">${esc(pts[pts.length-1].r.date)}</text>
+${pts.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.u).toFixed(1)}" r="7" fill="transparent" data-i="${i}"><title>${esc(p.r.date)} · ${esc(p.r.selection)}: ${fmt(p.u)}u (${gbp(p.u*UNIT)})</title></circle>`).join('')}
+<circle cx="${X(pts.length-1)}" cy="${Y(last)}" r="4" fill="#c8ff00"/></svg>`;
+const info=$('chartinfo');box.querySelectorAll('circle[data-i]').forEach(c=>{const f=()=>{const p=pts[+c.dataset.i];info.innerHTML=`${esc(p.r.date)} · ${esc(p.r.selection)} → <b class="${cls(p.u)}">${fmt(p.u)}u</b> (${gbp(p.u*UNIT)})`};c.onmouseenter=f;c.onclick=f});
+info.innerHTML=`Now: <b class="${cls(last)}">${fmt(last)}u</b> (${gbp(last*UNIT)}) over ${pts.length} settled picks. Tap or hover the line for details.`}
+function excl(){const rows=bets.filter(r=>String(r.posted).toLowerCase()==='email'&&settled(r));
+if(!rows.length){$('excl').innerHTML='<p class="note" style="margin:4px 0 10px">One pick a day goes to Telegram only. No exclusive picks have settled yet. Their record will show here, wins and losses, once they do.</p>';return}
+const a=agg(rows);$('excl').innerHTML=`<div class="nums"><div><small class="meta">W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div><div><small class="meta">P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div><small class="meta">Strike</small><b>${a.strike.toFixed(1)}%</b></div></div><p class="note" style="margin:0 0 10px">Telegram-only picks, logged after kickoff. ${rows.length} settled. ${gbp(a.pl)} at 1u = £5.</p>`}
+function splitTable(el,key,label){const g={};bets.filter(settled).forEach(r=>{const k=key(r)||'—';(g[k]??=[]).push(r)});
+el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+function splits(){splitTable(lt,r=>r.league,'League');splitTable(mt,r=>/^\d{4}-\d{2}/.test(r.date)?new Date(r.date.slice(0,7)+'-15').toLocaleDateString('en-GB',{month:'short',year:'numeric'})+' ('+r.date.slice(0,7)+')':'',  'Month')}
+async function clvLoad(){const el=$('clvbody');try{const j=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});
+const t=j.true,ap=j.approximate;let h='';
+if(t.n>0){h+=`<div class="stats" style="margin:10px 0"><div class="stat"><small>Closes checked</small><b>${t.n}</b></div><div class="stat"><small>Beat the close</small><b>${t.beat_pct}%</b></div><div class="stat"><small>Average CLV</small><b class="${cls(t.avg_clv_pct)}">${fmt(t.avg_clv_pct,1)}%</b></div></div>`;
+ if(t.n<30)h+=`<p class="note">Early data: only ${t.n} true closes so far. Read this as a trend once we pass 30.</p>`}
+else h+=`<p style="margin:10px 0"><b>Early data.</b> No true closing prices recorded yet. We now snapshot the best UK price shortly before kickoff, so headline CLV numbers will appear here as new picks settle.</p>`;
+if(ap.n>0){h+=`<p class="note">${ap.n} older picks have approximate closes only (reconstructed from football-data closing odds or an earlier price check, not a true pre-kickoff close). They're listed for transparency and not counted above.</p><div class="scroll"><table><tr><th>Date</th><th>Pick</th><th>Posted</th><th>Close</th><th>CLV</th></tr>`+
+ j.rows.filter(r=>r.approximate).map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.selection)}<div class="meta">${esc(r.match)}</div></td><td>${r.posted.toFixed(2)}</td><td>${r.closing.toFixed(2)}*</td><td class="${cls(r.clv_pct)}">${fmt(r.clv_pct,1)}%</td></tr>`).join('')+'</table></div><p class="note">* approximate close. CLV = posted ÷ close − 1.</p>'}
+h+=`<p class="note">Updated ${esc(j.generated_uk)} UK.</p>`;el.innerHTML=h}catch(e){el.innerHTML='<p class="note">CLV data isn\'t available right now.</p>'}}
+function deep(){const m=location.hash.match(/tip=(\d+)/);if(!m||deep.done===m[1])return;const id=+m[1];const r=bets.find(x=>x._id===id);if(!r)return;deep.done=m[1];
+['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';feed();document.querySelector('nav button[data-t=feed]').click();
+const el=document.querySelector(`#tips .tip[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash')}}
+window.addEventListener('hashchange',()=>{deep.done=null;deep()});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
 $('q').oninput=feed;
-refresh();setInterval(refresh,90000);
+fromCache();refresh();setInterval(refresh,90000);clvLoad();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
