@@ -1,27 +1,145 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>@PitchTipsX results</title><style>
-:root{--lime:#c7f032;--navy:#0a163c;--red:#e3262b}*{box-sizing:border-box;margin:0}
-body{background:#000;color:#fff;font-family:'Barlow Semi Condensed',Barlow,Arial Narrow,sans-serif;padding:28px;max-width:1100px;margin:auto}
-h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:46px;letter-spacing:.5px} h1 span{color:var(--lime)}
-h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--lime);font-size:24px;letter-spacing:1px;margin:30px 0 10px;border-bottom:1.5px solid var(--lime);padding-bottom:6px}
-.sub{color:#aaa;font-size:16px;margin-top:4px} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
-.tile{background:var(--lime);color:#000;padding:16px 18px} .tile .k{font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;font-size:17px}
-.tile .big{font-family:Anton,Impact;font-size:50px;line-height:1.1} .tile.dark{background:var(--navy);color:#fff} .tile.dark .k{color:var(--lime)}
-.pots{display:grid;grid-template-columns:repeat(3,1fr);gap:14px} .pot{background:var(--navy);padding:16px 18px} .pot .k{font-family:'Barlow Condensed';font-weight:700;font-size:22px}
-.pot .big{font-family:Anton,Impact;font-size:44px;color:var(--lime)} .st{display:inline-block;font-weight:700;font-size:14px;padding:2px 8px;background:#333} .st.open{background:var(--lime);color:#000} .st.bust{background:var(--red)}
-.sm{color:#bbb;font-size:14px;margin-top:6px} table{width:100%;border-collapse:collapse;font-size:17px} th{text-align:left;font-family:'Barlow Condensed';color:var(--lime);font-weight:700;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #333}
-td{padding:7px 8px;border-bottom:1px solid #1d1d1d} td.n{text-align:right;font-variant-numeric:tabular-nums} a{color:var(--lime)}
-.res{font-weight:700;padding:1px 8px;font-size:14px} .res.w{background:var(--lime);color:#000} .res.l{background:var(--red)} .res.v,.res.p{background:#444}
-footer{margin-top:34px;color:#888;font-size:14px;display:flex;justify-content:space-between}
-@media(max-width:760px){.grid,.pots{grid-template-columns:1fr 1fr}}
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PitchTipsX · Member App</title>
+<meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root{--navy:#0a1628;--card:#12223a;--line:#1f3352;--lime:#c8ff00;--mute:#9fb0c8;--red:#ff5c6c;--amber:#ffb020}
+*{box-sizing:border-box}body{margin:0;background:var(--navy);color:#fff;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--lime)}.hide{display:none!important}
+header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--navy);z-index:5}
+.wm{font-weight:900;font-size:22px;letter-spacing:-.5px}.wm span{color:var(--lime)}
+.cta{display:inline-block;background:var(--lime);color:var(--navy);font-weight:800;text-decoration:none;padding:9px 13px;border-radius:10px;text-align:center}
+main{max-width:900px;margin:0 auto;padding:12px}
+.hero .cta{display:block;font-size:17px;padding:14px}.note{color:var(--mute);font-size:13px;margin:8px 0}
+.live{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--lime);animation:pulse 1.6s infinite}
+.live.warn .dot{background:var(--amber);animation:none}.live.err .dot{background:var(--red);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,255,0,.7)}70%{box-shadow:0 0 0 9px rgba(200,255,0,0)}100%{box-shadow:0 0 0 0 rgba(200,255,0,0)}}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{display:block;font-size:22px}.stat small{color:var(--mute)}
+.pos{color:var(--lime)}.neg{color:var(--red)}
+.next{border:2px solid var(--lime);border-radius:14px;padding:12px;margin:14px 0;background:rgba(200,255,0,.06)}
+.next h2{margin:0 0 8px;font-size:15px;color:var(--lime);text-transform:uppercase;letter-spacing:1px}
+nav{display:flex;gap:6px;margin:14px 0 10px;overflow-x:auto;padding-bottom:4px}nav button{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--lime);color:var(--navy)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}@media(min-width:640px){.filters{grid-template-columns:repeat(4,1fr)}}
+select,input.search{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px;width:100%}
+input.search{margin-bottom:6px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px;gap:8px}
+.btn{background:transparent;border:1px solid var(--lime);color:var(--lime);border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}
+.tip{background:#000;border:1px solid #1a1a1a;border-left:5px solid var(--lime);border-radius:10px;padding:12px;margin-bottom:8px}
+.tip.pending{border:2px solid var(--lime);border-left:6px solid var(--lime);box-shadow:0 0 14px rgba(200,255,0,.35)}
+.tip.pending::before{content:'PENDING · LIVE PICK';display:block;color:var(--lime);font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.meta{color:var(--mute);font-size:13px}
+.sel{color:#fff;font-weight:800;font-size:16px;margin:4px 0}.odds{font-weight:800;color:var(--lime);font-size:20px}
+.slip{color:var(--lime);font-size:11px;font-weight:800;text-transform:uppercase}
+.chip{font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:#333;color:#fff}
+.chip.Won{background:var(--lime);color:#000}.chip.Lost{background:var(--red)}.chip.Pending{background:transparent;border:1px solid var(--lime);color:var(--lime)}
+.share{background:none;border:0;color:var(--lime);cursor:pointer;font-size:13px;padding:0 0 0 10px}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:14px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:600}
+.scroll{overflow-x:auto}
+.mk{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:12px;margin-bottom:8px}
+.track{height:12px;background:#1d2a3f;border-radius:6px;overflow:hidden;margin:6px 0}.fill{height:100%;background:var(--lime)}
+.how{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:14px 16px}.how li{margin:8px 0}
+footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:24px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--lime);color:#000;font-weight:800;padding:10px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
 </style></head><body>
-<h1>@PITCHTIPS<span>X</span> RESULTS</h1><div class=sub>£5 level-stakes desk record · built Tue 13 Oct 2026 15:36 UK from the public bet tracker</div>
-<div class=grid><div class=tile><div class=k>Record W-L-V</div><div class=big>41-36-3</div></div>
-<div class=tile><div class=k>Profit / loss</div><div class=big>−£21.20</div></div>
-<div class="tile dark"><div class=k>ROI</div><div class=big>-5.01%</div></div>
-<div class="tile dark"><div class=k>Strike rate</div><div class=big>53%</div></div></div>
-<div class=sub style="margin-top:8px">£423.55 staked over 80 settled bets</div>
-<div style='margin-top:26px;border:1px solid #2aabee;border-radius:12px;padding:18px 20px;background:rgba(42,171,238,.08)'><div style='font-size:18px;font-weight:700;margin-bottom:6px'>Picks first on Telegram, plus one exclusive pick a day that never hits X</div><a href='https://t.me/pitchtipsx' target='_blank' rel='noopener' style='display:inline-block;margin-top:8px;padding:10px 18px;background:#2aabee;color:#fff;border-radius:8px;font-weight:700;text-decoration:none'>Join free</a><div class=sub style='margin-top:10px'>18+ | GambleAware</div></div><h2>Strike rate by angle · last 20 settled</h2><table><tr><th>Angle</th><th style=text-align:right>W-L-V</th><th style=text-align:right>Strike</th><th style=text-align:right>P/L</th></tr><tr><td>Goals/Totals</td><td class=n>4-3-0</td><td class=n>57%</td><td class=n>+£1.80</td></tr><tr><td>1X2/Other</td><td class=n>3-3-0</td><td class=n>50%</td><td class=n>+£3.05</td></tr><tr><td>Cards</td><td class=n>3-1-0</td><td class=n>75%</td><td class=n>+£9.70</td></tr><tr><td>Props</td><td class=n>1-0-1</td><td class=n>100%</td><td class=n>+£4.00</td></tr><tr><td>Corners</td><td class=n>1-0-0</td><td class=n>100%</td><td class=n>+£7.00</td></tr></table>
 
-<h2>Recent picks</h2><table><tr><th>Date</th><th>Match</th><th>Pick</th><th style=text-align:right>Odds</th><th>Result</th><th style=text-align:right>P/L</th><th></th></tr><tr><td>10-12</td><td>Coventry vs Newcastle</td><td>Willock 2+ total shots</td><td class=n>1.80</td><td><span class='res w'>Won</span></td><td class=n>£4.00</td><td><a href=https://x.com/PitchTipsX/status/2109712597071057329>post ↗</a></td></tr><tr><td>10-11</td><td>Liverpool vs Man City</td><td>Man City Over 5.5 corners</td><td class=n>2.40</td><td><span class='res w'>Won</span></td><td class=n>£7.00</td><td><a href=https://x.com/PitchTipsX/status/2109220598580678725>post ↗</a></td></tr><tr><td>10-11</td><td>Liverpool vs Man City</td><td>Szoboszlai 2+ total shots</td><td class=n>1.80</td><td><span class='res v'>Void</span></td><td class=n>0</td><td><a href=https://x.com/PitchTipsX/status/2109220300252434802>post ↗</a></td></tr><tr><td>10-11</td><td>Inter Miami vs DC United</td><td>Both teams to score Yes</td><td class=n>1.43</td><td><span class='res l'>Lost</span></td><td class=n>-£5.00</td><td><a href=https://x.com/PitchTipsX/status/2108987774959337585>post ↗</a></td></tr><tr><td>10-10</td><td>Fortuna Sittard vs FC Twente</td><td>Both teams to score Yes</td><td class=n>1.53</td><td><span class='res w'>Won</span></td><td class=n>£2.65</td><td><a href=https://x.com/PitchTipsX/status/2108940883869753648>post ↗</a></td></tr><tr><td>10-10</td><td>Barcelona vs Getafe</td><td>Over 4.5 cards</td><td class=n>2.50</td><td><span class='res w'>Won</span></td><td class=n>£7.50</td><td><a href=https://x.com/PitchTipsX/status/2108894650039783687>post ↗</a></td></tr><tr><td>10-10</td><td>Aston Villa vs Brentford</td><td>Over 3.5 cards</td><td class=n>1.83</td><td><span class='res w'>Won</span></td><td class=n>£4.15</td><td><a href=https://x.com/PitchTipsX/status/2108857181768712477>post ↗</a></td></tr><tr><td>10-10</td><td>Chelsea vs Bournemouth</td><td>Over 3.5 cards</td><td class=n>1.61</td><td><span class='res w'>Won</span></td><td class=n>£3.05</td><td><a href=https://x.com/PitchTipsX/status/2108856435862085650>post ↗</a></td></tr><tr><td>10-10</td><td>Arsenal vs Leeds</td><td>Arsenal to win</td><td class=n>1.47</td><td><span class='res w'>Won</span></td><td class=n>£2.35</td><td><a href=https://x.com/PitchTipsX/status/2108866342355100035>post ↗</a></td></tr><tr><td>10-09</td><td>Malaga vs Espanyol</td><td>BTTS No</td><td class=n>2.00</td><td><span class='res l'>Lost</span></td><td class=n>-£5.00</td><td><a href=https://x.com/PitchTipsX/status/2108592745723965442>post ↗</a></td></tr><tr><td>10-09</td><td>Palmeiras vs Bahia</td><td>Under 2.5</td><td class=n>2.45</td><td><span class='res w'>Won</span></td><td class=n>£7.25</td><td><a href=https://x.com/PitchTipsX/status/2108278382224089356>post ↗</a></td></tr><tr><td>10-07</td><td>Internacional vs Corinthians</td><td>Match result Draw</td><td class=n>3.25</td><td><span class='res l'>Lost</span></td><td class=n>-£5.00</td><td><a href=https://x.com/PitchTipsX/status/2107753946479485366>post ↗</a></td></tr><tr><td>10-06</td><td>Estonia vs Iceland</td><td>Under 2.5</td><td class=n>1.90</td><td><span class='res w'>Won</span></td><td class=n>£4.50</td><td><a href=https://x.com/PitchTipsX/status/2107505999133164022>post ↗</a></td></tr><tr><td>10-05</td><td>Northern Ireland vs Georgia</td><td>Northern Ireland</td><td class=n>2.45</td><td><span class='res l'>Lost</span></td><td class=n>-£5.00</td><td><a href=https://x.com/PitchTipsX/status/2107154641481769220>post ↗</a></td></tr><tr><td>10-04</td><td>Talleres vs Belgrano</td><td>Belgrano</td><td class=n>2.98</td><td><span class='res w'>Won</span></td><td class=n>£9.90</td><td><a href=https://x.com/PitchTipsX/status/2106641511035322456>post ↗</a></td></tr></table>
-<footer><span>𝕏 @PitchTipsX</span><span>18+ | GambleAware · BeGambleAware.org</span></footer></body></html>
+<div id="toast"></div>
+<header><div class="wm">Pitch<span>Tips</span>X</div><div><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></div></header>
+<main>
+<div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
+<p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results don't guarantee future returns.</p></div>
+<div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
+<div class="stats" id="stats"><div class="stat"><small>Loading live record…</small></div></div>
+<section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
+<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="how">How we bet</button></nav>
+<section id="feed"><input class="search" id="q" type="search" placeholder="Search selection, match, league, market, notes…">
+<div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
+<div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"></div></section>
+<section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
+<section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"></div><p class="note" id="mkother"></p></section>
+<section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
+<section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
+<section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
+<li><b>Decimal odds</b> on everything.</li>
+<li><b>Best UK price</b>, quoted with the bookmaker and the time it was checked.</li>
+<li><b>Every result is logged.</b> Wins, losses and voids. No deleted losers.</li>
+<li><b>1u = £5.</b></li>
+<li><b>Staking:</b> flat stakes on most markets. Player shots, player shots on target and team corners use a model-based quarter-Kelly stake of 0.5–2u, and there's no bet under a 3% edge.</li>
+<li><b>One Telegram-exclusive pick a day.</b> It goes to Telegram first and is logged on the record after kickoff.</li>
+<li><b>Fun accas and bet builders</b> are just for fun. They're labelled as such and not tracked.</li>
+<li><b>Closing-line value (CLV)</b> is tracked to check whether we beat the closing price.</li>
+<li><b>No profit promises.</b> Betting carries risk. Only stake what you can afford to lose.</li>
+<li><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b></li></ul></div></section>
+</main>
+<footer><p><a href="https://t.me/pitchtipsx">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX">@PitchTipsX</a></p>
+<p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
+<script>
+const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5,APP='https://aroper53.github.io/pitchtipsx-record/';
+const $=id=>document.getElementById(id);
+const url=t=>`https://docs.google.com/spreadsheets/d/${ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}&_=${Date.now()}`;
+const load=t=>new Promise((res,rej)=>Papa.parse(url(t),{download:true,header:true,skipEmptyLines:true,complete:r=>r.data&&r.data.length&&r.meta.fields.length>1?res(r.data):rej(new Error('empty')),error:rej}));
+const money=s=>{if(s==null)return NaN;s=String(s).replace(/[£,\s]/g,'');return s===''?NaN:parseFloat(s)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(n,d=2)=>(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(d);
+const cls=n=>n>0?'pos':n<0?'neg':'';
+const settled=r=>['Won','Lost','Void'].includes(r.result);
+const resOf=r=>r.result||'Pending';
+const slipType=r=>{const x=String(r.slip||'').trim().toLowerCase();if(x==='challenge')return 'Challenge';if(x==='builder')return 'Bet builder';if(x.includes('acca')||/^a\d+$/.test(x))return 'Acca';if(x==='prop')return 'Player prop';if(x==='watch')return 'Watch';return 'Single'};
+const CATS=['Cards','Corners','Goals','Props','1X2'];
+const cat=r=>{const m=String(r.market||'').toLowerCase();if(/card|booking/.test(m))return 'Cards';if(/corner/.test(m))return 'Corners';if(/player|scorer|shot|sot|assist/.test(m))return 'Props';if(/btts|goal|clean sheet|over|under|total/.test(m))return 'Goals';if(/winner|match result|double chance|handicap|1x2|draw no bet/.test(m))return '1X2';return 'Other'};
+const book=r=>{const m=String(r.notes||'').match(/\d\.\d+\s+([A-Z][A-Za-z0-9 /&'-]{1,40}?)(?=\s*(?:\(|checked|via|;|,|$))/);return m?m[1].trim():''};
+const xlink=r=>{const m=String(r.notes||'').match(/https:\/\/x\.com\/PitchTipsX\/status\/\d+/i);return m?m[0]:''};
+const koKey=r=>{const t=String(r.kickoff_uk||'').match(/(\d+):(\d+)(?::\d+)?\s*(am|pm)?/i);let h=0,mi=0;if(t){h=+t[1]%12;mi=+t[2];if(/pm/i.test(t[3]||''))h+=12;if(!t[3])h=+t[1]}return (r.date||'')+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')};
+const koShort=r=>koKey(r).slice(11);
+let bets=[],view=[];
+function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
+function stats(){const a=agg(bets);$('stats').innerHTML=`
+<div class="stat"><small>Record W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div>
+<div class="stat"><small>Profit/Loss</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b><small>${a.pl<0?'−':''}£${Math.abs(a.pl).toFixed(2)}</small></div>
+<div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
+<div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
+function opts(id,fn,label){const el=$(id),cur=el.value;const vals=[...new Set(bets.map(fn).filter(Boolean))].sort();el.innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');el.onchange=feed}
+function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink(r);
+return `<div class="tip ${res==='Pending'?'pending':''}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}</span><span class="chip ${res}">${res}</span></div>
+<div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
+<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · KO ${esc(r.date)} ${koShort(r)}${bk?' · '+esc(bk):''}</div>
+<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View post</a>`:''}<button class="share" onclick="share(${i})">Share ↗</button></span></div></div>`}
+function feed(){const q=$('q').value.trim().toLowerCase(),L=fl.value,M=fm.value,R=fr.value,S=fs.value;
+view=bets.filter(r=>(!L||r.league===L)&&(!M||r.market===M)&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.league,r.market,r.notes].join(' ').toLowerCase().includes(q)));
+$('count').textContent=`${view.length} of ${bets.length} picks`;
+$('tips').innerHTML=view.map(r=>card(r,bets.indexOf(r))).join('')||'<p class="note">No picks match.</p>'}
+function next(){const p=bets.filter(r=>!settled(r)).sort((a,b)=>koKey(a).localeCompare(koKey(b)));
+$('next').innerHTML=p.length?p.map(r=>card(r,bets.indexOf(r))).join(''):'<p class="note" style="margin:0">No pending picks right now. New picks land on <a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a> first.</p>'}
+function monday(d){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(0,10)}
+function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
+wt.innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+function markets(){const s=bets.filter(settled);let h='';[...CATS,'Other'].forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(c==='Other'&&!rows.length)return;const a=agg(rows);
+h+=`<div class="mk"><div class="row"><b>${c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%"></div></div>
+<div class="row meta"><span>Strike <b style="color:#fff">${a.strike.toFixed(1)}%</b></span><span class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</span></div></div>`});
+$('mk').innerHTML=h;const o=s.filter(r=>cat(r)==='Other');$('mkother').textContent=o.length?`Other = ${o.length} settled picks whose market doesn't map to one category (${[...new Set(o.map(r=>r.market))].join(', ')}).`:''}
+function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!skip.includes(c)&&rows.some(r=>r[c]));
+el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+async function share(i){const r=bets[i],link=xlink(r)||APP;const text=`PitchTipsX pick: ${r.selection} @ ${r.odds} (${r.match}, ${r.league}) · ${resOf(r)}\n18+ | GambleAware`;
+if(navigator.share){try{await navigator.share({title:'PitchTipsX pick',text,url:link});return}catch(e){if(e.name==='AbortError')return}}
+try{await navigator.clipboard.writeText(text+'\n'+link);toast('Copied to clipboard')}catch(e){toast('Couldn\'t copy. Please copy manually.')}}
+function exportCsv(){const cols=['date','kickoff_uk','slip','match','league','market','selection','odds','stake','result','profit_loss','posted'];
+const csv=Papa.unparse({fields:cols,data:view.map(r=>cols.map(c=>r[c]??''))});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`pitchtipsx-picks-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+let fails=0,lastOk=null;
+function setLive(){const el=$('live'),t=lastOk?lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}):'';el.className='live'+(fails===0?'':fails===1&&lastOk?' warn':' err');
+$('livetxt').textContent=fails===0?`Live · updated ${t} UK`:lastOk?`Update failed · last updated ${t} UK · retrying`:'Couldn\'t load the live record · retrying'}
+async function refresh(){try{const raw=await load('Bets');
+bets=raw.filter(r=>r.date&&r.selection&&!(String(r.posted).toLowerCase()==='email'&&!settled(r)));
+bets.sort((a,b)=>koKey(b).localeCompare(koKey(a)));
+stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>r.market,'markets');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();
+fails=0;lastOk=new Date()}catch(e){fails++}setLive();
+load('Bankroll').then(r=>table(bt,r)).catch(()=>{});
+load('Challenge').then(r=>table(ct,r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{})}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','bank','chal','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
+$('q').oninput=feed;
+refresh();setInterval(refresh,90000);
+</script></body></html>
