@@ -26,15 +26,32 @@ table{width:100%;border-collapse:collapse;background:var(--card);border-radius:1
 .scroll{overflow-x:auto}.note{color:var(--mute);font-size:13px;margin:8px 0}a{color:var(--lime)}
 footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:24px}
 .hide{display:none}
+.tip{background:#000;border:1px solid #1a1a1a;border-left:5px solid var(--lime);border-radius:10px}
+.tip .sel{color:#fff;font-weight:800;font-size:16px}.tip .odds{font-size:20px}
+.tip.pending{border:2px solid var(--lime);border-left:6px solid var(--lime);box-shadow:0 0 14px rgba(200,255,0,.35)}
+.tip.pending::before{content:'PENDING · LIVE PICK';display:block;color:var(--lime);font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.chip{font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:#333;color:#fff}
+.chip.Won{background:var(--lime);color:#000}.chip.Lost{background:var(--red)}.chip.Pending{background:transparent;border:1px solid var(--lime);color:var(--lime)}
+.slip{color:var(--lime);font-size:11px;font-weight:800;text-transform:uppercase}
+#gate{position:fixed;inset:0;background:var(--navy);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+#gate .box{width:100%;max-width:360px;text-align:center;background:#000;border-left:6px solid var(--lime);border-radius:14px;padding:28px 20px}
+#gate input{width:100%;margin:16px 0 10px;padding:13px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:#fff;font-size:16px;text-align:center}
+#gate button{width:100%;padding:13px;border:0;border-radius:10px;background:var(--lime);color:#000;font-weight:900;font-size:16px;cursor:pointer}
+#gate.hide{display:none}
+#gerr{color:var(--red);min-height:18px;font-size:13px;margin-top:8px}
+.logout{color:var(--mute);font-size:12px;margin-right:10px}
 </style></head><body>
-<header><div class="wm">Pitch<span>Tips</span>X</div><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></header>
+<div id="gate"><form class="box" onsubmit="return tryCode(event)"><div class="wm" style="font-size:30px">Pitch<span>Tips</span>X</div>
+<p class="note">Members area. Enter your member code.</p><input id="code" placeholder="Member code" autocomplete="off" autocapitalize="none"><button>Unlock</button><div id="gerr"></div>
+<p class="note"><a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Get the code on Telegram →</a></p><p class="note">18+ | GambleAware</p></form></div>
+<header><div class="wm">Pitch<span>Tips</span>X</div><div><a href="#" class="logout" onclick="logout();return false">Log out</a><a class="cta" style="display:inline-block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></div></header>
 <main>
 <div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
 <p class="note">Every pick logged, wins and losses. Decimal odds, flat stakes (1u = £5). Past results don't guarantee future returns.</p></div>
 <div class="stats" id="stats"><div class="stat"><small>Loading live record…</small></div></div>
 <p class="note" id="upd"></p>
 <nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button></nav>
-<section id="feed"><div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select></div><div id="tips"></div></section>
+<section id="feed"><div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div><div id="tips"></div></section>
 <section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
 <section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
 <section id="chal" class="hide"><p class="note">£10→£100 challenge: whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
@@ -49,6 +66,8 @@ const money=s=>{if(s==null)return NaN;s=String(s).replace(/[£,\s]/g,'');return 
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=(n,d=2)=>(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(d);
 const cls=n=>n>0?'pos':n<0?'neg':'';
+const slipType=r=>{const x=String(r.slip||'').trim().toLowerCase();if(x==='challenge')return 'Challenge';if(x==='builder')return 'Bet builder';if(x.includes('acca')||/^a\d+$/.test(x))return 'Acca';if(x==='prop')return 'Player prop';if(x==='watch')return 'Watch';return 'Single'};
+const book=r=>{const m=String(r.notes||'').match(/\d\.\d+\s+([A-Z][A-Za-z0-9 /&'-]{1,40}?)(?=\s*(?:\(|checked|via|;|,|$))/);return m?m[1].trim():''};
 const settled=r=>['Won','Lost','Void'].includes(r.result);
 let bets=[];
 function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
@@ -57,24 +76,30 @@ function stats(){const a=agg(bets);document.getElementById('stats').innerHTML=`
 <div class="stat"><small>Profit/Loss</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b><small>${a.pl<0?'−':''}£${Math.abs(a.pl).toFixed(2)}</small></div>
 <div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
 <div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
-function opts(id,key,label){const vals=[...new Set(bets.map(r=>key==='result'?(r.result||'Pending'):r[key]).filter(Boolean))].sort();document.getElementById(id).innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join('');document.getElementById(id).onchange=feed}
-function feed(){const L=fl.value,M=fm.value,R=fr.value;const rows=bets.filter(r=>(!L||r.league===L)&&(!M||r.market===M)&&(!R||(r.result||'Pending')===R));
+function opts(id,key,label){const vals=[...new Set(bets.map(r=>key==='result'?(r.result||'Pending'):key==='slip'?slipType(r):r[key]).filter(Boolean))].sort();document.getElementById(id).innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join('');document.getElementById(id).onchange=feed}
+function feed(){const L=fl.value,M=fm.value,R=fr.value,S=fs.value;const rows=bets.filter(r=>(!L||r.league===L)&&(!M||r.market===M)&&(!R||(r.result||'Pending')===R)&&(!S||slipType(r)===S));
 document.getElementById('tips').innerHTML=rows.map(r=>{const res=r.result||'Pending',p=money(r.profit_loss);const link=(r.notes||'').match(/https:\/\/x\.com\/PitchTipsX\/status\/\d+/i);
-return `<div class="tip ${res==='Pending'?'pending':''}"><div class="row"><span class="meta">${esc(r.date)} · ${esc(r.kickoff_uk)} · ${esc(r.league)}</span><span class="pill ${res}">${res}</span></div>
-<div class="meta">${esc(r.match)} · ${esc(r.market)}</div><div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
-<div class="row meta"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span>${link?`<a href="${link[0]}" target="_blank" rel="noopener">View post</a>`:''}</div></div>`}).join('')||'<p class="note">No picks match.</p>'}
+const bk=book(r);return `<div class="tip ${res==='Pending'?'pending':''}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}</span><span class="chip ${res}">${res}</span></div>
+<div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
+<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · KO ${esc(r.date)} ${esc(r.kickoff_uk)}${bk?' · '+esc(bk):''}</div>
+<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span>${link?`<a href="${link[0]}" target="_blank" rel="noopener">View post</a>`:''}</div></div>`}).join('')||'<p class="note">No picks match.</p>'}
 function monday(d){const x=new Date(d+'T12:00:00Z');const k=(x.getUTCDay()+6)%7;x.setUTCDate(x.getUTCDate()-k);return x.toISOString().slice(0,10)}
 function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
 wt.innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
 function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!c.startsWith('_')&&!skip.includes(c)&&rows.some(r=>r[c]));
 el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','bank','chal'].forEach(s=>document.getElementById(s).classList.toggle('hide',s!==b.dataset.t))});
-(async()=>{try{const raw=await load('Bets');
+const CODES=['pt2026','pitchtips'],KEY='ptx_member';let started=false;
+function tryCode(e){e.preventDefault();if(CODES.includes(code.value.trim().toLowerCase())){localStorage.setItem(KEY,'1');unlock()}else gerr.textContent='Code not recognised. Get it on Telegram.';return false}
+function logout(){localStorage.removeItem(KEY);location.reload()}
+function unlock(){gate.classList.add('hide');if(!started){started=true;start()}}
+async function start(){try{const raw=await load('Bets');
 bets=raw.filter(r=>r.date&&r.selection&&!(String(r.posted).toLowerCase()==='email'&&!settled(r)));
 bets.sort((a,b)=>(b.date+(b.kickoff_uk||'')).localeCompare(a.date+(a.kickoff_uk||'')));
-stats();opts('fl','league','leagues');opts('fm','market','markets');opts('fr','result','results');feed();weeks();
+stats();opts('fl','league','leagues');opts('fm','market','markets');opts('fr','result','results');opts('fs','slip','slip types');feed();weeks();
 document.getElementById('upd').textContent='Live from the tracker sheet · loaded '+new Date().toLocaleString('en-GB',{timeZone:'Europe/London'})+' UK';
 }catch(e){document.getElementById('stats').innerHTML='<div class="stat"><small>Couldn\'t load the live record. Please refresh.</small></div>'}
 load('Bankroll').then(r=>table(bt,r)).catch(()=>{});
-load('Challenge').then(r=>table(ct,r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{});})();
+load('Challenge').then(r=>table(ct,r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{});}
+if(localStorage.getItem(KEY)==='1')unlock();
 </script></body></html>
