@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PitchTipsX · Member App</title>
+<meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
+<meta name="ptx-version" content="v8"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root{--navy:#0a1628;--card:#12223a;--line:#1f3352;--lime:#c8ff00;--mute:#9fb0c8;--red:#ff5c6c;--amber:#ffb020;--coral:#ff6b6b}
+.clvh{background:#000;border:2px solid var(--lime);border-radius:14px;padding:14px;margin:12px 0}.clvh h2{margin:0 0 6px;font-size:15px;color:var(--lime);text-transform:uppercase;letter-spacing:1px}.clvh .big{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.clvh .big b{font-size:34px;line-height:1}.clvh .gauge{flex:1;min-width:160px}.gtrack{position:relative;height:14px;border-radius:7px;background:#1d2a3f;overflow:hidden}.gtrack .gz{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;left:50%}.gtrack .gf{position:absolute;top:0;bottom:0}.glab{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:3px}.clvh .pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pill{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:#fff}.clvh .lnk{background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer;padding:6px 0;font-size:14px}
+.mk .pl{display:flex;align-items:center;gap:8px;margin-top:6px}.mk .pl .half{flex:1;height:10px;background:#1d2a3f;border-radius:5px;position:relative;overflow:hidden}.mk .pl .half i{position:absolute;top:0;bottom:0;display:block}.mk .pl .half .zl{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#fff;opacity:.6}
+#chart{touch-action:pan-y;overflow:hidden}#chart svg{max-width:100%}
+*{box-sizing:border-box}body{margin:0;background:var(--navy);color:#fff;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--lime)}.hide{display:none!important}
+header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--navy);z-index:5}
+.wm{font-weight:900;font-size:22px;letter-spacing:-.5px}.wm span{color:var(--lime)}
+.cta{display:inline-block;background:var(--lime);color:var(--navy);font-weight:800;text-decoration:none;padding:9px 13px;border-radius:10px;text-align:center}
+main{max-width:900px;margin:0 auto;padding:12px}
+.hero .cta{display:block;font-size:17px;padding:14px}.note{color:var(--mute);font-size:13px;margin:8px 0}
+.live{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--lime);animation:pulse 1.6s infinite}
+.live.warn .dot{background:var(--amber);animation:none}.live.err .dot{background:var(--red);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,255,0,.7)}70%{box-shadow:0 0 0 9px rgba(200,255,0,0)}100%{box-shadow:0 0 0 0 rgba(200,255,0,0)}}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{display:block;font-size:22px}.stat small{color:var(--mute)}
+.pos{color:var(--lime)}.neg{color:var(--coral)}
+.next{border:2px solid var(--lime);border-radius:14px;padding:12px;margin:14px 0;background:rgba(200,255,0,.06)}
+.next h2{margin:0 0 8px;font-size:15px;color:var(--lime);text-transform:uppercase;letter-spacing:1px}
+nav{display:flex;gap:6px;margin:14px 0 10px;overflow-x:auto;padding-bottom:4px}nav button{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer;white-space:nowrap}
+@media(max-width:560px){nav{flex-wrap:wrap;overflow:visible}nav button{padding:8px 11px;font-size:13px}}
+nav button.on{background:var(--lime);color:var(--navy)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}@media(min-width:640px){.filters{grid-template-columns:repeat(4,1fr)}}
+select,input.search{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px;width:100%}
+input.search{margin-bottom:6px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px;gap:8px}
+.btn{background:transparent;border:1px solid var(--lime);color:var(--lime);border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}
+.tip{background:#000;border:1px solid #1a1a1a;border-left:5px solid var(--lime);border-radius:10px;padding:12px;margin-bottom:8px}
+.tip.pending{border:2px solid var(--lime);border-left:6px solid var(--lime);box-shadow:0 0 14px rgba(200,255,0,.35)}
+.tip.pending::before{content:'PENDING · LIVE PICK';display:block;color:var(--lime);font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.meta{color:var(--mute);font-size:13px}
+.sel{color:#fff;font-weight:800;font-size:16px;margin:4px 0}.odds{font-weight:800;color:var(--lime);font-size:20px}
+.slip{color:var(--lime);font-size:11px;font-weight:800;text-transform:uppercase}
+.chip{font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:#333;color:#fff}
+.chip.Won{background:var(--lime);color:#000}.chip.Lost{background:var(--coral);color:#000}.chip.Pending{background:transparent;border:1px solid var(--lime);color:var(--lime)}
+.share{background:none;border:0;color:var(--lime);cursor:pointer;font-size:14px;font-weight:700;padding:10px 0 10px 12px;min-height:40px}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:14px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:600}
+.scroll{overflow-x:auto}
+.mk{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:12px;margin-bottom:8px}
+.track{height:12px;background:#1d2a3f;border-radius:6px;overflow:hidden;margin:6px 0}.fill{height:100%;background:var(--lime)}
+.how{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:14px 16px}.how li{margin:8px 0}
+footer{text-align:center;color:var(--mute);padding:24px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}.panel h2{margin:0 0 6px;font-size:15px}
+#chart svg{width:100%;height:auto;display:block}#chartinfo{font-size:13px;color:var(--mute);min-height:18px}
+.excl{background:#000;border:2px solid var(--lime);border-radius:14px;padding:14px;margin:12px 0}.excl h2{margin:0 0 4px;font-size:15px;color:var(--lime);text-transform:uppercase;letter-spacing:1px}
+.excl .nums{display:flex;gap:16px;margin:8px 0 10px}.excl .nums b{display:block;font-size:22px}
+.tip.flash{animation:flash 2.4s ease 2}@keyframes flash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px var(--lime),0 0 24px rgba(200,255,0,.6)}}
+h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;letter-spacing:1px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--lime);color:#000;font-weight:800;padding:10px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+.fx-sub{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}.fx-sub button{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:700;cursor:pointer}.fx-sub button.on{background:var(--lime);color:var(--navy)}
+.fxm{background:#000;border-left:5px solid var(--lime);border-radius:10px;padding:10px 12px;margin-bottom:6px}.fxm .t{font-weight:800}.fxday{color:var(--lime);font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px}
+.fxempty{background:#000;border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center}.fxerr{border-color:var(--red);color:#fff}
+.tokbox{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.tokbox input{flex:1;min-width:200px;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px}
+.hw{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0}@media(min-width:640px){.hw{grid-template-columns:repeat(4,1fr)}}.hw div{background:#000;border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:10px;padding:8px 10px;font-size:13px}.hw b{display:block;color:var(--lime);font-size:14px}
+.timg{display:block;margin:8px 0 2px;border-radius:8px;overflow:hidden;border:1px solid #1a1a1a;background:#0a0a0a}.timg img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain}
+.lv{display:inline-block;font-size:11px;font-weight:900;padding:3px 8px;border-radius:6px;margin-left:6px;background:#1d2a3f;color:#fff}.lv.IN_PLAY,.lv.PAUSED{background:var(--coral);color:#000}.lv.FINISHED{background:#fff;color:#000}
+.fxtip{display:inline-block;margin-top:4px;font-size:13px;font-weight:700;color:var(--lime)}
+.sumgrid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:640px){.sumgrid{grid-template-columns:1fr 1fr}}.sumgrid figure{margin:0;background:#000;border-radius:12px;padding:8px}.sumgrid img{width:100%;display:block;border-radius:8px}.sumgrid figcaption{display:flex;justify-content:space-between;align-items:center;padding-top:6px}
+#install{display:none}
+
+/* v8 premium theme */
+:root{--card:#0f1d33;--line:#1c2e4a;--ink:#000;--soft:#16263f}
+body{background:radial-gradient(1200px 600px at 50% -200px,#13284a 0%,var(--navy) 60%) fixed;-webkit-font-smoothing:antialiased}
+header{backdrop-filter:blur(10px);background:rgba(10,22,40,.88)}
+.lock{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}.lock .pt{width:38px;height:38px;border-radius:9px;background:#c8ff00;color:#0a1628;font-weight:900;font-size:19px;letter-spacing:-1px;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(200,255,0,.25)}
+.lock .wm{font-size:20px;line-height:1}.lock small{display:block;font-size:10px;letter-spacing:2px;color:var(--mute);font-weight:700;margin-top:3px}
+.hero .cta{font-size:15px;padding:12px}
+.cta,.btn,nav button,.preset,.share,.qa{transition:transform .12s ease,background .15s ease,color .15s ease,border-color .15s ease}
+.cta:hover{filter:brightness(1.06)}.btn:hover,.qa:hover{background:rgba(200,255,0,.1)}nav button:hover:not(.on){border-color:#3a5480}
+.tip{background:#000;border:1px solid #161d29;border-left:0;border-bottom:3px solid #c8ff00;border-radius:12px;padding:12px 14px 10px;margin-bottom:10px;transition:transform .15s ease,box-shadow .15s ease}
+.tip:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.tip .sel{font-size:17px;margin:2px 0;line-height:1.2}.tip .odds{font-size:30px;font-weight:900;line-height:1;letter-spacing:-1px;color:#fff}
+.tip .odds small{display:block;font-size:10px;letter-spacing:1px;color:var(--mute);font-weight:700;text-align:right}
+.tip .meta{font-size:12.5px}.tip.Lost{border-bottom-color:#3a2430}.tip.Void{border-bottom-color:#2a3b55}
+.tip.pending{border:1px solid #c8ff00;border-bottom:3px solid #c8ff00;box-shadow:0 0 18px rgba(200,255,0,.18)}
+.tip.excl{background:linear-gradient(180deg,#0b0f05,#000 40%)}
+.mo{display:inline-block;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 7px;border-radius:5px;border:1px solid #c8ff00;color:#c8ff00;margin-left:6px;vertical-align:middle}
+.spk{display:inline-block;vertical-align:middle;margin-left:6px}
+.qas{display:flex;gap:6px;margin-top:8px}.qa{flex:1;text-align:center;border:1px solid #2b3f60;border-radius:8px;padding:9px;color:#fff;text-decoration:none;font-weight:700;font-size:13px;background:transparent;cursor:pointer}
+.presets{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px}.preset{white-space:nowrap;background:transparent;border:1px solid #2b3f60;color:#fff;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer}.preset.on{border-color:#c8ff00;color:#c8ff00;background:rgba(200,255,0,.08)}
+#tips.fade>*{animation:fin .28s ease both}@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.sk{background:linear-gradient(90deg,#0f1d33 25%,#18304f 50%,#0f1d33 75%);background-size:200% 100%;animation:shim 1.2s infinite;border-radius:12px}@keyframes shim{to{background-position:-200% 0}}
+.sktip{height:118px;margin-bottom:10px}.skstat{height:76px}
+.clvh{background:#000;border:1px solid #1c2e4a;border-bottom:3px solid #c8ff00}.clvh h2{font-size:22px;color:#fff;text-transform:none;letter-spacing:-.3px}.clvh h2 em{font-style:normal;color:#c8ff00}
+#mk{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(min-width:640px){#mk{grid-template-columns:repeat(3,1fr)}}
+.mk{border-left:0;border-bottom:3px solid #c8ff00;border-radius:12px;margin:0}.mk.negm{border-bottom-color:#ff6b6b}.mk .kp{display:flex;justify-content:space-between;margin:8px 0 2px}.mk .kp b{display:block;font-size:22px;line-height:1.1}.mk .kp small{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.pin{background:#000;border:1px solid #1c2e4a;border-radius:12px;padding:10px 12px;margin:10px 0}.pin .ph{display:flex;justify-content:space-between;align-items:center}.pin h2{margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mute)}.pin .hw{margin:8px 0 0}
+.gate{background:#000;border:1px dashed #c8ff00;border-radius:12px;padding:14px;text-align:center}.gate b{color:#c8ff00}
+dialog{background:#0f1d33;color:#fff;border:1px solid #c8ff00;border-radius:14px;max-width:340px;width:90%}dialog::backdrop{background:rgba(0,0,0,.6)}dialog input{width:100%;margin:10px 0;background:#000;color:#fff;border:1px solid #2b3f60;border-radius:8px;padding:10px;font-size:16px;letter-spacing:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+
+<div id="toast"></div>
+<dialog id="mdlg"><form method="dialog" id="mform"><b style="font-size:17px">Members</b><p class="note" style="color:#fff">Enter the member code from the Telegram channel to see pending picks and Telegram exclusives.</p><input id="mcode" autocomplete="off" placeholder="Member code" aria-label="Member code"><p class="note" id="merr"></p><div style="display:flex;gap:6px"><button class="cta" style="flex:1;border:0" value="ok">Unlock</button><button class="btn" value="cancel">Cancel</button></div></form></dialog>
+<header><a class="lock" href="./" aria-label="PitchTipsX home"><span class="pt">PT</span><span><span class="wm">Pitch<span>Tips</span>X</span><small>MEMBER APP</small></span></a><div style="display:flex;gap:6px;align-items:center"><button class="btn" id="install">Install</button><button class="btn" id="mbtn">Members</button> <a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></div></header>
+<main>
+<div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
+<p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results don't guarantee future returns.</p></div>
+<section class="clvh" id="clvhome"><h2>Beat the close: <em style="color:var(--mute)">early data</em></h2><div id="clvh"><p class="note" style="margin:0">Loading closing-price data…</p></div></section>
+<section class="pin" aria-label="How we bet"><div class="ph"><h2>How we bet</h2><button class="lnk" style="background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">Full rules →</button></div><div class="hw"><div><b>1u = £5</b>Every stake in units</div><div><b>Best UK price</b>With bookmaker + time checked</div><div><b>Every bet logged</b>Losses included, nothing deleted</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div></section>
+<div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
+<div class="stats" id="stats"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div>
+<section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"></div><div id="chartinfo">Tap or hover the line for details.</div></section>
+<section class="excl"><h2>Telegram exclusive record</h2><div id="excl"></div><a class="cta" style="display:block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join Telegram</a></section>
+<section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
+<nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="cards">Cards</button><button data-t="fix">Fixtures</button><button data-t="how">How we bet</button></nav>
+<section id="feed"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
+<div class="presets" id="presets"><button class="preset" data-p="cards">Cards only</button><button class="preset" data-p="corners">Corners only</button><button class="preset" data-p="week">This week</button><button class="preset" data-p="pending">Pending</button><button class="preset" data-p="won">Winners</button><button class="preset" data-p="">Clear</button></div>
+<div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
+<div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
+<section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
+<section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"></div><p class="note" id="mkother"></p></section>
+<section id="splits" class="hide"><h3>By league</h3><div class="scroll"><table id="lt"></table></div><h3>By month</h3><div class="scroll"><table id="mt"></table></div><p class="note">Settled picks only. Strike excludes voids; ROI = P/L ÷ total staked.</p></section>
+<section id="clv" class="hide"><div class="how"><h2 style="margin-top:0">Beat the closing price</h2><p class="note" style="color:#fff">Closing-line value (CLV) compares the price we posted with the best UK price just before kickoff. Beating the close regularly is the best sign a tipster finds value, whatever the short-term results.</p><div id="clvbody"><p class="note">Loading…</p></div></div></section>
+<section id="bank" class="hide"><div class="scroll"><table id="bt"></table></div></section>
+<section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"></table></div></section>
+<section id="cards" class="hide"><p class="note">Shareable summary cards from the live record: this month, last month and each market. Settled picks only.</p><div class="sumgrid" id="sumgrid"></div></section>
+<section id="fix" class="hide"><div class="fx-sub"><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button data-c="CL">Champions Lg</button><button id="fx24">Next 24h</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Data: football-data.org, fetched with your own free token. Times shown in your local time.</p></section>
+<section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
+<li><b>Decimal odds</b> on everything.</li>
+<li><b>Best UK price</b>, quoted with the bookmaker and the time it was checked.</li>
+<li><b>Every result is logged.</b> Wins, losses and voids. No deleted losers.</li>
+<li><b>1u = £5.</b></li>
+<li><b>Staking:</b> flat stakes on most markets. Player shots, player shots on target and team corners use a model-based quarter-Kelly stake of 0.5–2u, and there's no bet under a 3% edge.</li>
+<li><b>One Telegram-exclusive pick a day.</b> It goes to Telegram first and is logged on the record after kickoff.</li>
+<li><b>Fun accas and bet builders</b> are just for fun. They're labelled as such and not tracked.</li>
+<li><b>Closing-line value (CLV)</b> is tracked to check whether we beat the closing price.</li>
+<li><b>No profit promises.</b> Betting carries risk. Only stake what you can afford to lose.</li>
+<li><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b></li></ul>
+<h3>Fixtures tab: your football-data.org token</h3><p class="note" style="color:#fff">Get a free token at <a href="https://www.football-data.org/client/register" target="_blank" rel="noopener">football-data.org</a> (free tier: 10 calls/min). It's saved only in this browser.</p>
+<div class="tokbox"><input id="fdtok" type="password" placeholder="Paste your API token" autocomplete="off"><button class="btn" id="fdsave">Save</button><button class="btn" id="fdclear">Clear</button></div><p class="note" id="fdstat"></p></div></section>
+</main>
+<footer><p><a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX" target="_blank" rel="noopener">@PitchTipsX</a></p>
+<p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
+<script>
+const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5,BASE=location.origin+location.pathname.replace(/[^/]*$/,'');
+const $=id=>document.getElementById(id);
+const url=t=>`https://docs.google.com/spreadsheets/d/${ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(t)}&_=${Date.now()}`;
+const parse=txt=>{const r=Papa.parse(txt,{header:true,skipEmptyLines:true});if(!r.data.length||r.meta.fields.length<2)throw new Error('empty');return r.data};
+const fetchTxt=t=>fetch(url(t),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
+const load=t=>new Promise((res,rej)=>Papa.parse(url(t),{download:true,header:true,skipEmptyLines:true,complete:r=>r.data&&r.data.length&&r.meta.fields.length>1?res(r.data):rej(new Error('empty')),error:rej}));
+const money=s=>{if(s==null)return NaN;s=String(s).replace(/[£,\s]/g,'');return s===''?NaN:parseFloat(s)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(n,d=2)=>(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(d);
+const gbp=n=>(n<0?'−':'')+'£'+Math.abs(n).toFixed(2);
+const cls=n=>n>0?'pos':n<0?'neg':'';
+const settled=r=>['Won','Lost','Void'].includes(r.result);
+const resOf=r=>r.result||'Pending';
+const slipType=r=>{const x=String(r.slip||'').trim().toLowerCase();if(x==='challenge')return 'Challenge';if(x==='builder')return 'Bet builder';if(x.includes('acca')||/^a\d+$/.test(x))return 'Acca';if(x==='prop')return 'Player prop';if(x==='watch')return 'Watch';return 'Single'};
+const CATS=['Cards','Corners','Goals','Props','1X2'];
+const cat=r=>{const m=String(r.market||'').toLowerCase();if(/card|booking/.test(m))return 'Cards';if(/corner/.test(m))return 'Corners';if(/player|scorer|shot|sot|assist/.test(m))return 'Props';if(/btts|goal|clean sheet|over|under|total/.test(m))return 'Goals';if(/winner|match result|double chance|handicap|1x2|draw no bet/.test(m))return '1X2';return 'Other'};
+const book=r=>{const m=String(r.notes||'').match(/\d\.\d+\s+([A-Z][A-Za-z0-9 /&'-]{1,40}?)(?=\s*(?:\(|checked|via|;|,|$))/);return m?m[1].trim():''};
+const xlink=r=>{const m=String(r.notes||'').match(/https:\/\/x\.com\/PitchTipsX\/status\/\d+/i);return m?m[0]:''};
+const koKey=r=>{const t=String(r.kickoff_uk||'').match(/(\d+):(\d+)(?::\d+)?\s*(am|pm)?/i);let h=0,mi=0;if(t){h=+t[1]%12;mi=+t[2];if(/pm/i.test(t[3]||''))h+=12;if(!t[3])h=+t[1]}return (r.date||'')+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')};
+const koShort=r=>koKey(r).slice(11);
+// TODO(Ted): change the member code here. Client-side only: the Google Sheet is public, so this is a soft gate, not security.
+const MEMBER_CODE='PITCH2026',MK='ptx_member';
+const isMember=()=>{try{return localStorage.getItem(MK)===MEMBER_CODE}catch(e){return false}};
+const isExcl=r=>String(r.posted||'').trim().toLowerCase()==='email';
+let bets=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false;
+const xid=r=>{const m=xlink(r).match(/status\/(\d+)/);return m?m[1]:''};
+const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:''};
+fetch('tipimg.json').then(r=>r.json()).then(j=>{TIMG=j;if(bets.length){feed();next()}}).catch(()=>{});
+function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
+function stats(){const a=agg(bets);$('stats').innerHTML=`
+<div class="stat"><small>Record W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div>
+<div class="stat"><small>Profit/Loss</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b><small>${a.pl<0?'−':''}£${Math.abs(a.pl).toFixed(2)}</small></div>
+<div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
+<div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
+function opts(id,fn,label){const el=$(id),cur=el.value;const vals=[...new Set(bets.map(fn).filter(Boolean))].sort();el.innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');el.onchange=feed}
+function spkBuild(){SPK={};let cum=0;const pts=[];bets.filter(settled).slice().sort((a,b)=>koKey(a).localeCompare(koKey(b))||a._id-b._id).forEach(r=>{cum+=(money(r.profit_loss)||0)/UNIT;pts.push(cum);SPK[r._id]=pts.slice(-12)})}
+function spark(v,w=64,h=18){if(!v||v.length<2)return'';const mn=Math.min(...v,0),mx=Math.max(...v,0),rg=mx-mn||1;const X=i=>(i/(v.length-1)*(w-2)+1).toFixed(1),Y=x=>(h-1-(x-mn)/rg*(h-2)).toFixed(1);const last=v[v.length-1];
+return `<svg class="spk" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="Running P/L to this pick"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2b3f60" stroke-width="1"/><polyline fill="none" stroke="${last>=0?'#c8ff00':'#ff6b6b'}" stroke-width="1.6" points="${v.map((x,i)=>X(i)+','+Y(x)).join(' ')}"/></svg>`}
+function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink(r);
+return `<div class="tip ${res==='Pending'?'pending':res}${isExcl(r)?' excl':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}${isExcl(r)?'<span class="mo">🔒 MEMBERS ONLY</span>':''}</span><span><span class="chip ${res}">${res}</span><span class="lv hide" data-lv="${r._id}"></span></span></div>
+<div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}<small>DECIMAL</small></div></div>
+${tipImg(r)}<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · KO ${esc(r.date)} ${koShort(r)}${bk?' · '+esc(bk):''}</div>
+<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
+function seeFix(id){const r=bets.find(x=>x._id===id);document.querySelector('nav button[data-t=fix]').click();window.fxOpen&&window.fxOpen(r?r.league:'');document.querySelector('nav').scrollIntoView({behavior:'smooth'})}
+function feed(){const q=$('q').value.trim().toLowerCase(),L=$('fl').value,M=$('fm').value,R=$('fr').value,S=$('fs').value;
+const wk=monday(new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'}));view=bets.filter(r=>(!wkOnly||r.date>=wk)&&(!pendOnly||!settled(r))&&(!L||r.league===L)&&(!M||cat(r)===M.split(' ')[0])&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.market].join(' ').toLowerCase().includes(q)));
+$('count').textContent=`${view.length} of ${bets.length} picks`;
+const T=$('tips');T.classList.remove('fade');void T.offsetWidth;T.classList.add('fade');T.innerHTML=view.map(r=>card(r,bets.indexOf(r))).join('')||(pendOnly?'<p class="note">No pending picks right now. New picks land on Telegram first.</p>':!isMember()&&R==='Pending'?'<div class="gate">Pending picks are for <b>members</b>. <button class="btn" onclick="memberOpen()">Unlock</button></div>':'<p class="note">No picks match.</p>')}
+function preset(p){['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';wkOnly=false;pendOnly=false;
+const setSel=(id,v)=>{const o=[...$(id).options].find(o=>o.value===v||o.textContent===v);if(o)$(id).value=o.value};
+if(p==='cards')setSel('fm','Cards');if(p==='corners')setSel('fm','Corners');if(p==='won')setSel('fr','Won');if(p==='week')wkOnly=true;
+if(p==='pending'){if(!isMember()){memberOpen();return}pendOnly=true}
+document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('on',!!p&&b.dataset.p===p));feed()}
+function memberOpen(){$('merr').textContent='';$('mcode').value='';if($('mdlg').showModal)$('mdlg').showModal();else{const c=prompt('Member code');if(c)memberTry(c)}}
+function memberTry(c){if(String(c).trim().toUpperCase()===MEMBER_CODE){try{localStorage.setItem(MK,MEMBER_CODE)}catch(e){}toast('Welcome, member');memberUi();fromCache();refresh();return true}return false}
+function memberUi(){const m=isMember();$('mbtn').textContent=m?'Member ✓':'Members';$('mbtn').title=m?'Tap to sign out of member view':'Unlock member view'}
+function next(){if(!isMember()){$('next').innerHTML=`<div class="gate">${hiddenPending?`<b>${hiddenPending}</b> pending pick${hiddenPending>1?'s':''} right now · members only.`:'No pending picks right now.'}<br><span class="note">Members see pending picks and Telegram exclusives. Every pick lands on the public record once settled.</span><br><button class="cta" style="border:0;margin-top:8px" onclick="memberOpen()">Member login</button> <a class="btn" style="display:inline-block;margin-top:8px;text-decoration:none" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Get the code on Telegram</a></div>`;return}
+const p=bets.filter(r=>!settled(r)).sort((a,b)=>koKey(a).localeCompare(koKey(b)));
+$('next').innerHTML=p.length?p.map(r=>card(r,bets.indexOf(r))).join(''):'<p class="note" style="margin:0">No pending picks right now. New picks land on <a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a> first.</p>'}
+function monday(d){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(0,10)}
+function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
+$('wt').innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+function markets(){const s=bets.filter(settled);let h='';const mxu=Math.max(1,...[...CATS,'Other'].map(c=>Math.abs(agg(s.filter(r=>cat(r)===c)).pl/UNIT)));[...CATS,'Other'].forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(c==='Other'&&!rows.length)return;const a=agg(rows);
+h+=`<div class="mk${a.pl<0?' negm':''}"><div class="row"><b>${c==='Other'?'Accas / builders':c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="kp"><div><small>Strike</small><b>${a.strike.toFixed(0)}%</b></div><div><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,0)}%</b></div><div><small>n</small><b>${rows.length}</b></div></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%;background:${a.strike>=50?'var(--lime)':'var(--coral)'}"></div></div>
+<div class="row meta"><span>Strike <b style="color:#fff">${a.strike.toFixed(1)}%</b></span><span class="${cls(a.pl)}"><b>${fmt(a.pl/UNIT)}u</b> (${gbp(a.pl)})</span></div><div class="pl" title="P/L in units"><span class="meta" style="width:30px">P/L</span><div class="half"><span class="zl"></span><i style="${a.pl>=0?'left:50%':'right:50%'};width:${(Math.min(Math.abs(a.pl/UNIT)/mxu,1)*50).toFixed(1)}%;background:${a.pl>=0?'var(--lime)':'var(--coral)'}"></i></div><span class="meta" style="width:46px;text-align:right">ROI ${fmt(a.roi,0)}%</span></div></div>`});
+$('mk').innerHTML=h;const o=s.filter(r=>cat(r)==='Other');$('mkother').textContent=o.length?`Other = ${o.length} settled picks whose market doesn't map to one category (${[...new Set(o.map(r=>r.market))].join(', ')}).`:''}
+function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!skip.includes(c)&&rows.some(r=>r[c]));
+el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+const shareLink=id=>BASE+'#tip='+id;
+async function doShare(title,text,link,blob,fname){const full=text+'\n'+(link?link+'\n':'')+'Picks first: t.me/pitchtipsx\n18+ | GambleAware';
+if(blob&&navigator.canShare){const f=new File([blob],fname||'pitchtipsx.png',{type:'image/png'});if(navigator.canShare({files:[f]})){try{await navigator.share({title,text:full,files:[f]});return}catch(e){if(e.name==='AbortError')return}}}
+if(navigator.share){try{await navigator.share({title,text:full});return}catch(e){if(e.name==='AbortError')return}}
+try{await navigator.clipboard.writeText(full);toast(blob?'Text copied · image downloading':'Copied to clipboard')}catch(e){toast('Couldn\'t copy. Please copy manually.')}
+if(blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname||'pitchtipsx.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}}
+async function share(id){const r=bets.find(x=>x._id===id);if(!r)return;const res=resOf(r);
+const text=`PitchTipsX pick: ${r.selection} @ ${r.odds}\n${r.match} (${r.league})${res!=='Pending'?' · '+res:''}${xlink(r)?'\nX: '+xlink(r):''}`;
+const blob=await drawCard({kicker:slipType(r)+' · '+(r.market||''),title:r.selection,big:String(r.odds||''),bigLabel:'odds',lines:[r.match,(r.league||'')+' · '+(r.date||'')],badge:res});
+doShare('PitchTipsX pick',text,shareLink(id),blob,`pitchtipsx-pick-${id}.png`)}
+function wrap(c,t,w){const ws=String(t).split(/\s+/),out=[];let l='';ws.forEach(x=>{const y=l?l+' '+x:x;if(c.measureText(y).width>w&&l){out.push(l);l=x}else l=y});if(l)out.push(l);return out}
+function drawCard(o){const c=document.createElement('canvas');c.width=1080;c.height=1080;const g=c.getContext('2d'),L='#c8ff00',F='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+g.fillStyle='#000';g.fillRect(0,0,1080,1080);g.fillStyle='#0a1628';g.fillRect(0,0,1080,120);g.fillStyle=L;g.fillRect(0,120,1080,8);
+g.font='900 54px '+F;g.fillStyle='#fff';g.fillText('Pitch',60,82);let w=g.measureText('Pitch').width;g.fillStyle=L;g.fillText('Tips',60+w,82);w+=g.measureText('Tips').width;g.fillStyle='#fff';g.fillText('X',60+w,82);
+if(o.badge){g.font='900 34px '+F;const bw=g.measureText(o.badge.toUpperCase()).width+40;g.fillStyle=o.badge==='Won'?L:o.badge==='Lost'?'#ff6b6b':'#1d2a3f';g.fillRect(1020-bw,40,bw,56);g.fillStyle=o.badge==='Pending'||o.badge==='Void'?'#fff':'#000';g.fillText(o.badge.toUpperCase(),1040-bw,80)}
+let y=220;g.fillStyle=L;g.font='800 34px '+F;g.fillText(String(o.kicker||'').toUpperCase().slice(0,48),60,y);y+=80;
+g.fillStyle='#fff';g.font='900 72px '+F;wrap(g,o.title,960).slice(0,3).forEach(t=>{g.fillText(t,60,y);y+=84});
+if(o.big){y+=40;g.fillStyle=o.bigColor||L;g.font='900 150px '+F;g.fillText(o.big,60,y+110);g.fillStyle='#9fb0c8';g.font='700 34px '+F;g.fillText(o.bigLabel||'',66,y+160);y+=230}
+g.fillStyle='#fff';g.font='600 38px '+F;(o.lines||[]).filter(Boolean).slice(0,6).forEach(t=>{y+=56;g.fillText(String(t).slice(0,52),60,y)});
+g.fillStyle='#0a1628';g.fillRect(0,960,1080,120);g.fillStyle=L;g.font='800 36px '+F;g.fillText('t.me/pitchtipsx',60,1030);g.fillStyle='#fff';g.font='700 30px '+F;const ga='18+ | GambleAware';g.fillText(ga,1020-g.measureText(ga).width,1030);
+return new Promise(r=>c.toBlob(r,'image/png'))}
+function exportCsv(){const cols=['date','kickoff_uk','slip','match','league','market','selection','odds','stake','result','profit_loss','posted'];
+const csv=Papa.unparse({fields:cols,data:view.map(r=>cols.map(c=>r[c]??''))});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`pitchtipsx-picks-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+window.ptxBets=()=>bets;let fails=0,lastOk=null;
+function setLive(){const el=$('live'),t=lastOk?lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}):'';el.className='live'+(fails===0?'':fails===1&&lastOk?' warn':' err');
+$('livetxt').textContent=fails===0?`Live · updated ${t} UK`:lastOk?`Update failed · last updated ${t} UK · retrying`:'Couldn\'t load the live record · retrying'}
+const CK='ptx_bets_csv_v1';
+function render(txt){const raw=parse(txt);raw.forEach((r,i)=>r._id=i+2);
+const base=raw.filter(r=>r.date&&r.selection);const mem=isMember();bets=mem?base:base.filter(settled);hiddenPending=base.length-base.filter(settled).length;
+bets.sort((a,b)=>koKey(b).localeCompare(koKey(a))||b._id-a._id);
+spkBuild();stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>{const c=cat(r);return c==='Other'?'Other (accas/builders)':c},'market types');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();chart();excl();splits();deep();summaries();window.fxLive&&fxLive()}
+function fromCache(){try{const c=JSON.parse(localStorage.getItem(CK)||'null');if(!c)return;render(c.txt);lastOk=new Date(c.t);fails=0;$('live').className='live warn';$('livetxt').textContent='Saved copy from '+lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'})+' UK · refreshing…'}catch(e){}}
+async function refresh(){try{const txt=await fetchTxt('Bets');render(txt);fails=0;lastOk=new Date();try{localStorage.setItem(CK,JSON.stringify({t:Date.now(),txt}))}catch(e){}}catch(e){fails++}setLive();
+load('Bankroll').then(r=>table($('bt'),r)).catch(()=>{});
+load('Challenge').then(r=>table($('ct'),r.filter(x=>Object.entries(x).some(([k,v])=>v&&k!=='Step')),['Notes'])).catch(()=>{})}
+function chart(){const s=bets.filter(settled).slice().sort((a,b)=>koKey(a).localeCompare(koKey(b))||a._id-b._id);const box=$('chart'),info=$('chartinfo');
+if(!s.length){box.innerHTML='<p class="note">No settled picks yet.</p>';return}
+let cum=0;const pts=s.map(r=>{cum+=(money(r.profit_loss)||0)/UNIT;return{u:cum,r}});
+const W=Math.max(300,Math.round(box.clientWidth||640)),mob=W<520,H=mob?230:250,PL=mob?38:44,PR=12,PT=12,PB=28,fs=mob?11:12;
+let mn=Math.min(0,...pts.map(p=>p.u)),mx=Math.max(0,...pts.map(p=>p.u));const raw=(mx-mn)||1,step=[1,2,5,10,20,50].find(x=>raw/x<=5)||100;mn=Math.floor(mn/step)*step;mx=Math.ceil(mx/step)*step;if(mx===mn)mx=mn+step;
+const X=i=>PL+(W-PL-PR)*(pts.length<2?0.5:i/(pts.length-1)),Y=v=>PT+(H-PT-PB)*(1-(v-mn)/(mx-mn));
+let grid='';for(let v=mn;v<=mx+1e-9;v+=step){grid+=`<line x1="${PL}" x2="${W-PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v===0?'#ffffff':'#1f3352'}" stroke-width="${v===0?1.5:1}" ${v===0?'':'stroke-dasharray="3 4"'}/><text x="${PL-6}" y="${Y(v)+4}" fill="${v===0?'#fff':'#9fb0c8'}" font-size="${fs}" text-anchor="end">${v>0?'+':''}${v}u</text>`}
+const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.u).toFixed(1)).join(' '),z=Y(0).toFixed(1),last=pts[pts.length-1].u;
+const dl=i=>{const t=pts[i].r.date||'';return /^\d{4}-\d{2}-\d{2}$/.test(t)?new Date(t+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):t};
+const ticks=mob?[0,pts.length-1]:[0,Math.floor((pts.length-1)/2),pts.length-1];
+box.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative profit in units"><defs><clipPath id="cpu"><rect x="0" y="0" width="${W}" height="${z}"/></clipPath><clipPath id="cpd"><rect x="0" y="${z}" width="${W}" height="${H}"/></clipPath></defs>${grid}
+<path d="${d} L${X(pts.length-1)} ${z} L${X(0)} ${z} Z" fill="rgba(200,255,0,.18)" clip-path="url(#cpu)"/><path d="${d} L${X(pts.length-1)} ${z} L${X(0)} ${z} Z" fill="rgba(255,107,107,.2)" clip-path="url(#cpd)"/>
+<path d="${d}" fill="none" stroke="#c8ff00" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpu)"/><path d="${d}" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpd)"/>
+${[...new Set(ticks)].map((i,k,arr)=>`<text x="${X(i)}" y="${H-8}" fill="#9fb0c8" font-size="${fs}" text-anchor="${k===0?'start':k===arr.length-1?'end':'middle'}">${esc(dl(i))}</text>`).join('')}
+<line id="cx" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#fff" stroke-opacity=".35" class="hide"/><circle id="cd" r="6" fill="#fff" class="hide"/>
+<circle cx="${X(pts.length-1)}" cy="${Y(last)}" r="5" fill="${last>=0?'#c8ff00':'#ff6b6b'}"/><rect x="${PL}" y="0" width="${W-PL-PR}" height="${H}" fill="transparent" id="chit"/></svg>`;
+const sv=box.querySelector('svg'),cx=sv.querySelector('#cx'),cd=sv.querySelector('#cd');
+const pick=e=>{const rc=sv.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-rc.left;let i=pts.length<2?0:Math.round((x-PL)/(W-PL-PR)*(pts.length-1));i=Math.max(0,Math.min(pts.length-1,i));const p=pts[i];
+cx.setAttribute('x1',X(i));cx.setAttribute('x2',X(i));cx.classList.remove('hide');cd.setAttribute('cx',X(i));cd.setAttribute('cy',Y(p.u));cd.classList.remove('hide');
+const pp=money(p.r.profit_loss)||0;info.innerHTML=`${esc(p.r.date)} · ${esc(p.r.selection)} (${esc(resOf(p.r))}, <span class="${cls(pp)}">${fmt(pp/UNIT)}u</span>) → total <b class="${cls(p.u)}">${fmt(p.u)}u</b> (${gbp(p.u*UNIT)})`};
+sv.addEventListener('pointermove',pick);sv.addEventListener('pointerdown',pick);sv.addEventListener('touchmove',pick,{passive:true});
+info.innerHTML=`Now: <b class="${cls(last)}">${fmt(last)}u</b> (${gbp(last*UNIT)}) over ${pts.length} settled picks. Tap or drag on the chart for details.`}
+let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(bets.length)chart()},150)});
+function excl(){const rows=bets.filter(r=>String(r.posted).toLowerCase()==='email'&&settled(r));
+if(!rows.length){$('excl').innerHTML='<p class="note" style="margin:4px 0 10px">One pick a day goes to Telegram only. No exclusive picks have settled yet. Their record will show here, wins and losses, once they do.</p>';return}
+const a=agg(rows);$('excl').innerHTML=`<div class="nums"><div><small class="meta">W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div><div><small class="meta">P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div><small class="meta">Strike</small><b>${a.strike.toFixed(1)}%</b></div></div><p class="note" style="margin:0 0 10px">Telegram-only picks, logged after kickoff. ${rows.length} settled. ${gbp(a.pl)} at 1u = £5.</p>`}
+function splitTable(el,key,label){const g={};bets.filter(settled).forEach(r=>{const k=key(r)||'—';(g[k]??=[]).push(r)});
+el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+function splits(){splitTable($('lt'),r=>r.league,'League');splitTable($('mt'),r=>/^\d{4}-\d{2}/.test(r.date)?new Date(r.date.slice(0,7)+'-15').toLocaleDateString('en-GB',{month:'short',year:'numeric'})+' ('+r.date.slice(0,7)+')':'',  'Month')}
+async function clvLoad(){const el=$('clvbody');try{const j=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});
+const t=j.true,ap=j.approximate;clvHome(j);let h='';
+if(t.n>0){h+=`<div class="stats" style="margin:10px 0"><div class="stat"><small>Closes checked</small><b>${t.n}</b></div><div class="stat"><small>Beat the close</small><b>${t.beat_pct}%</b></div><div class="stat"><small>Average CLV</small><b class="${cls(t.avg_clv_pct)}">${fmt(t.avg_clv_pct,1)}%</b></div></div>`;
+ if(t.n<30)h+=`<p class="note">Early data: only ${t.n} true closes so far. Read this as a trend once we pass 30.</p>`}
+else h+=`<p style="margin:10px 0"><b>Early data.</b> No true closing prices recorded yet. We now snapshot the best UK price shortly before kickoff, so headline CLV numbers will appear here as new picks settle.</p>`;
+if(ap.n>0){h+=`<p class="note">${ap.n} older picks have approximate closes only (reconstructed from football-data closing odds or an earlier price check, not a true pre-kickoff close). They're listed for transparency and not counted above.</p><div class="scroll"><table><tr><th>Date</th><th>Pick</th><th>Posted</th><th>Close</th><th>CLV</th></tr>`+
+ j.rows.filter(r=>r.approximate).map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.selection)}<div class="meta">${esc(r.match)}</div></td><td>${r.posted.toFixed(2)}</td><td>${r.closing.toFixed(2)}*</td><td class="${cls(r.clv_pct)}">${fmt(r.clv_pct,1)}%</td></tr>`).join('')+'</table></div><p class="note">* approximate close. CLV = posted ÷ close − 1.</p>'}
+h+=`<p class="note">Updated ${esc(j.generated_uk)} UK.</p>`;el.innerHTML=h}catch(e){el.innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>'}}
+function clvHome(j){const tr=(j.rows||[]).filter(r=>!r.approximate&&r.clv_pct!=null).sort((a,b)=>String(a.date).localeCompare(b.date));let acc=0;const avg=tr.map((r,i)=>(acc+= +r.clv_pct)/(i+1));const t=j.true||{},ap=j.approximate||{},n=+t.n||0,go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';let h;
+if(n>0&&t.avg_clv_pct!=null&&t.beat_pct!=null){const v=+t.avg_clv_pct,bp=+t.beat_pct,w=Math.min(Math.abs(v)/10,1)*50;$('clvhome').querySelector('h2').innerHTML=`Beat the close: <em class="${cls(v)}">${fmt(v,1)}%</em> ${spark(avg,90,24)}`;
+h=`<div class="big"><div><b class="${cls(v)}">${fmt(v,1)}%</b><div class="meta">average CLV</div></div><div class="gauge"><div class="gtrack"><span class="gf" style="${v>=0?'left:50%':'right:50%'};width:${w.toFixed(1)}%;background:${v>=0?'var(--lime)':'var(--coral)'}"></span><span class="gz"></span></div><div class="glab"><span>−10%</span><span>0</span><span>+10%</span></div></div></div>
+<div style="margin-top:10px"><div class="row meta"><span>Beat the close</span><b style="color:#fff">${bp.toFixed(0)}% of ${n}</b></div><div class="track"><div class="fill" style="width:${Math.min(bp,100)}%;background:${bp>=50?'var(--lime)':'var(--coral)'}"></div></div></div>`+(n<30?`<p class="note" style="margin:6px 0 0">Early data: ${n} true closes so far. Read it as a trend once we pass 30.</p>`:'')}
+else h=`<div class="big"><div><b>${n}</b><div class="meta">true closes recorded</div></div><div style="flex:1;min-width:180px"><b style="font-size:15px;display:block">Early data</b><span class="note" style="margin:0">We now snapshot the best UK price just before kickoff. Our CLV % and beat-the-close rate appear here as new picks settle.</span></div></div>`+(ap.n?`<div class="pillrow"><span class="pill">${ap.n} older picks with approximate closes (not counted)</span></div>`:'');
+$('clvh').innerHTML=h+go}
+
+let sumBlobs=[];
+async function summaries(){const el=$('sumgrid');if(!el)return;const s=bets.filter(settled),mk=k=>s.filter(r=>r.date&&r.date.startsWith(k));
+const now=new Date(),ym=d=>d.toISOString().slice(0,7),thisM=ym(now),prev=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,15)),lastM=ym(prev);
+const mname=k=>new Date(k+'-15').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const specs=[];[[thisM,'This month'],[lastM,'Last month']].forEach(([k,lab])=>{const rows=mk(k);if(rows.length)specs.push({name:lab+' · '+mname(k),rows,file:'month-'+k})});
+CATS.forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(rows.length)specs.push({name:c+' · all time',rows,file:'market-'+c.toLowerCase()})});
+const out=[];for(const sp of specs){const a=agg(sp.rows);const blob=await drawCard({kicker:'Record summary',title:sp.name,big:`${fmt(a.pl/UNIT)}u`,bigColor:a.pl>=0?'#c8ff00':'#ff6b6b',bigLabel:`profit/loss · ${gbp(a.pl)} at 1u = £5`,lines:[`Record ${a.w}-${a.l}-${a.v}`,`Strike ${a.strike.toFixed(1)}% · ROI ${fmt(a.roi,1)}%`,`${sp.rows.length} settled picks, losses included`]});
+out.push({sp,a,blob,url:URL.createObjectURL(blob)})}
+sumBlobs.forEach(x=>URL.revokeObjectURL(x.url));sumBlobs=out;
+el.innerHTML=out.length?out.map((x,i)=>`<figure><img src="${x.url}" alt="${esc(x.sp.name)} summary card"><figcaption><span class="meta">${esc(x.sp.name)}</span><button class="share" data-sum="${i}">Share ↗</button></figcaption></figure>`).join(''):'<p class="note">No settled picks yet.</p>';
+el.querySelectorAll('[data-sum]').forEach(b=>b.onclick=()=>{const x=sumBlobs[+b.dataset.sum];doShare('PitchTipsX record',`PitchTipsX ${x.sp.name}: ${x.a.w}-${x.a.l}-${x.a.v}, ${fmt(x.a.pl/UNIT)}u (${gbp(x.a.pl)}), ROI ${fmt(x.a.roi,1)}%. Every pick logged.`,BASE,x.blob,`pitchtipsx-${x.sp.file}.png`)})}
+let deferredInstall;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$('install').style.display='inline-block'});
+$('install').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('install').style.display='none'};
+window.addEventListener('offline',()=>{$('live').className='live warn';$('livetxt').textContent='Offline · showing the last saved record'});
+function deep(){const m=location.hash.match(/tip=(\d+)/);if(!m||deep.done===m[1])return;const id=+m[1];const r=bets.find(x=>x._id===id);if(!r)return;deep.done=m[1];
+['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';feed();document.querySelector('nav button[data-t=feed]').click();
+const el=document.querySelector(`#tips .tip[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash')}}
+window.addEventListener('hashchange',()=>{deep.done=null;deep()});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','cards','fix','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
+$('q').oninput=()=>{document.querySelectorAll('.preset').forEach(b=>b.classList.remove('on'));feed()};
+document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>preset(b.dataset.p));
+$('mbtn').onclick=()=>{if(isMember()){if(confirm('Leave member view on this device?')){try{localStorage.removeItem(MK)}catch(e){}memberUi();fromCache();refresh()}}else memberOpen()};
+$('mform').addEventListener('submit',e=>{if(e.submitter&&e.submitter.value==='cancel')return;if(!memberTry($('mcode').value)){e.preventDefault();$('merr').textContent='That code isn\'t right. Get the current code in the Telegram channel.'}});
+memberUi();
+fromCache();refresh();setInterval(refresh,90000);clvLoad();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+<script>
+(function(){
+const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/',K='pt_fd_token';let comp='PL',busy=false,n24=false;
+const el=id=>document.getElementById(id),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tok=()=>{try{return localStorage.getItem(K)||''}catch(e){return ''}};
+function stat(){el('fdstat').textContent=tok()?'Token saved in this browser ✓':'No token saved.'}
+function goHow(){document.querySelector('nav button[data-t=how]').click();el('fdtok').focus()}
+function empty(msg,err){el('fxbody').innerHTML='<div class="fxempty'+(err?' fxerr':'')+'">'+msg+'</div>'}
+async function get(path,ttl=600000){const ck='ptx_fd_'+path;try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&Date.now()-c.t<ttl)return c.j}catch(e){}
+ const r=await fetch(PX+path,{headers:{'X-Auth-Token':tok()}});
+ if(r.status===429){const w=r.headers.get('X-RequestCounter-Reset');throw new Error('Rate limit hit (10 calls/min on the free tier). Try again in '+(w?w+'s':'a minute')+'.')}
+ if(r.status===400||r.status===401||r.status===403)throw new Error('football-data.org rejected the token. Check it in <a href="#" data-gohow>How we bet</a>.');
+ if(!r.ok)throw new Error('Couldn\'t load data (error '+r.status+'). Try again shortly.');const j=await r.json();try{localStorage.setItem(ck,JSON.stringify({t:Date.now(),j}))}catch(e){}return j}
+const norm=t=>String(t||'').toLowerCase().replace(/\b(fc|afc|cf|sc|the)\b/g,'').replace(/united/g,'utd').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const nameOk=(team,side)=>{const a=norm(side);return [team?.shortName,team?.name,team?.tla].some(n=>{const b=norm(n);return b&&a&&(a===b||a.includes(b)||b.includes(a)||a.split(' ')[0]===b.split(' ')[0]&&a.split(' ')[0].length>3)})};
+const sides=r=>String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);
+const sameDay=(r,x)=>{const d=new Date(x.utcDate).toLocaleDateString('en-CA',{timeZone:'Europe/London'});return r.date===d};
+const tipFor=x=>(window.ptxBets?window.ptxBets():[]).filter(r=>{const s=sides(r);return s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1])});
+const COMP=l=>/premier league/i.test(l)&&!/scottish|welsh|irish/i.test(l)?'PL':/championship/i.test(l)&&!/scottish|league one/i.test(l)?'ELC':/champions league|ucl/i.test(l)?'CL':'';
+window.fxOpen=l=>{const c=COMP(l||'');const b=c&&document.querySelector('.fx-sub button[data-c="'+c+'"]');if(b)b.click();else load()};
+window.fxLive=async function(){if(!tok())return;const pend=(window.ptxBets?window.ptxBets():[]).filter(r=>!['Won','Lost','Void'].includes(r.result)&&COMP(r.league||''));if(!pend.length)return;
+ const today=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+ for(const c of [...new Set(pend.map(r=>COMP(r.league)))]){try{const m=await get(c+'/matches?dateFrom='+today+'&dateTo='+today,60000);
+  pend.filter(r=>COMP(r.league)===c).forEach(r=>{const s=sides(r);const x=(m.matches||[]).find(x=>s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1]));if(!x)return;
+   const sc=x.score?.fullTime,lab={IN_PLAY:'LIVE',PAUSED:'HT',FINISHED:'FT',TIMED:'KO '+new Date(x.utcDate).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}),SCHEDULED:'Scheduled',POSTPONED:'Postponed'}[x.status]||x.status;
+   document.querySelectorAll('[data-lv="'+r._id+'"]').forEach(b=>{b.className='lv '+x.status;b.textContent=lab+(sc&&sc.home!=null?' '+sc.home+'-'+sc.away:'')})})}catch(e){}}};
+let again=false;async function load(){if(busy){again=true;return}if(!tok()){empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
+ busy=true;empty('Loading…');
+ try{const [m,s]=await Promise.all([get(comp+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000),get(comp+'/standings',1800000)]);
+  const all=(m.matches||[]),now=Date.now(),ms=(n24?all.filter(x=>{const t=new Date(x.utcDate)-now;return t>-3*3600e3&&t<24*3600e3}):all).slice(0,20);let h='<h3>Upcoming matches</h3>',last='';
+  if(!ms.length)h+='<p class="note">'+(n24?'No matches in the next 24 hours.':'No upcoming matches listed.')+'</p>';
+  ms.forEach(x=>{const d=new Date(x.utcDate),day=d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});if(day!==last){h+='<div class="fxday">'+esc(day)+'</div>';last=day}
+   h+='<div class="fxm"><div class="row"><span class="t">'+esc(x.homeTeam?.shortName||x.homeTeam?.name)+' v '+esc(x.awayTeam?.shortName||x.awayTeam?.name)+'</span><span class="meta">'+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</span></div>'+(x.matchday?'<div class="meta">Matchday '+esc(x.matchday)+'</div>':'')+tipFor(x).map(r=>'<a class="fxtip" href="#tip='+r._id+'">Our tip: '+esc(r.selection)+' @ '+esc(r.odds)+' →</a>').join('<br>')+'</div>'});
+  const tb=((s.standings||[]).find(t=>t.type==='TOTAL')||{}).table||[];
+  h+='<h3>Standings (top 10)</h3>';
+  h+=tb.length?'<div class="scroll"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>'+tb.slice(0,10).map(r=>'<tr><td>'+r.position+'</td><td>'+esc(r.team?.shortName||r.team?.name)+'</td><td>'+r.playedGames+'</td><td>'+r.won+'</td><td>'+r.draw+'</td><td>'+r.lost+'</td><td>'+r.goalDifference+'</td><td><b>'+r.points+'</b></td></tr>').join('')+'</table></div>':'<p class="note">Standings not available.</p>';
+  el('fxbody').innerHTML=h}
+ catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false;if(again){again=false;load()}}}
+document.addEventListener('click',e=>{if(e.target.closest('[data-gohow]')){e.preventDefault();goHow()}});
+document.querySelectorAll('.fx-sub button[data-c]').forEach(b=>b.addEventListener('click',()=>{comp=b.dataset.c;document.querySelectorAll('.fx-sub button[data-c]').forEach(x=>x.classList.toggle('on',x===b));load()}));
+el('fxre').addEventListener('click',()=>{try{Object.keys(localStorage).filter(k=>k.startsWith('ptx_fd_'+comp+'/')).forEach(k=>localStorage.removeItem(k))}catch(e){}load()});
+el('fx24').addEventListener('click',()=>{n24=!n24;el('fx24').classList.toggle('on',n24);load()});
+document.querySelector('nav button[data-t=fix]').addEventListener('click',load);
+el('fdsave').addEventListener('click',()=>{const v=el('fdtok').value.trim();if(!v)return;try{localStorage.setItem(K,v)}catch(e){}el('fdtok').value='';stat()});
+el('fdclear').addEventListener('click',()=>{try{localStorage.removeItem(K)}catch(e){}stat()});
+stat();
+setInterval(()=>window.fxLive&&window.fxLive(),120000);
+})();
+</script>
+</body></html>
