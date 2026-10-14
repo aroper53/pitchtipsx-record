@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
-<meta name="ptx-version" content="v9"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="ptx-version" content="v10"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -139,6 +139,13 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 #a2hs{position:fixed;left:12px;right:12px;bottom:12px;z-index:50;max-width:520px;margin:0 auto;background:#0f1d33;border:1px solid var(--soft2);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.5);animation:fin .3s ease both}#a2hs p{margin:0;flex:1;font-size:13px;color:#cfd8e6}#a2hs .x{background:none;border:0;color:#8394ad;font-size:20px;cursor:pointer;padding:4px 6px}
 #clvhome .lnk,.pin .lnk,.share,.lnk{color:#fff!important}.hstrip b small{font-weight:500}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0!important}}
+.tgfx{display:block;margin:8px 0 2px;background:#000;border:1px solid #1a1a1a;border-radius:8px;padding:14px 16px;color:#fff;text-decoration:none}
+.tgfx span{display:block}.tgk{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8394ad}.tgs{font-size:20px;font-weight:900;text-transform:uppercase;margin-top:4px;line-height:1.15}.tgu{width:56px;height:4px;background:#c8ff00;margin:8px 0}.tgo{font-size:52px;font-weight:900;color:#c8ff00;line-height:1}.tgl{font-size:10px;color:#8394ad;margin-top:6px;font-weight:700}
+#fx24{order:-1;background:#c8ff00!important;color:#0a1628!important;font-weight:900}#fx24:not(.on){background:transparent!important;color:#c8ff00!important;border:1px solid #c8ff00!important}
+.fxm{padding:8px 12px!important;margin-bottom:5px}.fxm .row{gap:8px}.fxm .tc{background:#c8ff00;color:#0a1628;font-size:10px;font-weight:900;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:middle;text-decoration:none}
+.fxm.flash,.fxs a.flash{outline:2px solid #c8ff00}.fxst{font-size:11px;font-weight:800;color:#8394ad}.fxst.live{color:#c8ff00}
+#fxstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#fxstrip:empty{display:none}#fxstrip .fxh{flex:0 0 auto;font-size:11px;font-weight:900;color:#c8ff00;align-self:center;letter-spacing:.06em}
+#fxstrip a{flex:0 0 auto;background:#000;border:1px solid var(--soft2);border-left:4px solid #c8ff00;border-radius:10px;padding:6px 10px;color:#fff;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap}#fxstrip a small{display:block;color:#8394ad;font-weight:700}
 </style></head><body>
 
 <div id="toast"></div>
@@ -159,7 +166,7 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <section id="feed"><div class="fbar" id="fbar"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
 <div class="presets" id="presets"><button class="preset" data-p="cards">Cards only</button><button class="preset" data-p="corners">Corners only</button><button class="preset" data-p="week">This week</button><button class="preset" data-p="pending">Pending</button><button class="preset" data-p="won">Winners</button><button class="preset" data-p="">Clear</button></div>
 <div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
-</div><div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
+</div><div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="fxstrip" aria-label="Next 24h fixtures"></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
 <section id="weeks" class="hide"><div class="scroll"><table id="wt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div><p class="note" id="mkother"></p></section>
 <section id="splits" class="hide"><h3>By league</h3><div class="scroll"><table id="lt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div><h3>By month</h3><div class="scroll"><table id="mt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div><p class="note">Settled picks only. Strike excludes voids; ROI = P/L ÷ total staked.</p></section>
@@ -167,7 +174,7 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <section id="bank" class="hide"><div class="scroll"><table id="bt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="cards" class="hide"><p class="note">Shareable summary cards from the live record: this month, last month and each market. Settled picks only.</p><div class="sumgrid" id="sumgrid"><div class="sk" style="aspect-ratio:1"></div><div class="sk" style="aspect-ratio:1"></div></div></section>
-<section id="fix" class="hide"><div class="fx-sub"><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button data-c="CL">Champions Lg</button><button id="fx24">Next 24h</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Data: football-data.org, fetched with your own free token. Times shown in your local time.</p></section>
+<section id="fix" class="hide"><div class="fx-sub"><button id="fx24" class="on">Next 24h</button><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button data-c="CL">Champions Lg</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Data: football-data.org, fetched with your own free token. Times in UK time (Europe/London).</p></section>
 <section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
 <li><b>Decimal odds</b> on everything.</li>
 <li><b>Best UK price</b>, quoted with the bookmaker and the time it was checked.</li>
@@ -219,7 +226,8 @@ const sdot=r=>{const x=resOf(r);return `<span class="sd ${x==='Won'?'won':x==='L
 const clvLine=r=>{const c=CLVM[((r.date||'')+'|'+(r.selection||'')).toLowerCase()];return c?`<div class="clvl">CLV <b class="${cls(+c.clv_pct)}">${fmt(+c.clv_pct,1)}%</b> · posted ${(+c.posted).toFixed(2)} v close ${(+c.closing).toFixed(2)}</div>`:''};
 let bets=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false;
 const xid=r=>{const m=xlink(r).match(/status\/(\d+)/);return m?m[1]:''};
-const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:''};
+const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:tgfx(r)};
+const tgfx=r=>{const lk=xlink(r),inner=`<span class="tgk">${esc(slipType(r))} · ${esc(r.market)}</span><span class="tgs">${esc(r.selection)}</span><span class="tgu"></span><span class="tgo">${esc(r.odds)}</span><span class="tgl">Decimal odds · @PitchTipsX · 18+ | GambleAware</span>`;return lk?`<a class="tgfx" href="${lk}" target="_blank" rel="noopener" aria-label="Open the X post">${inner}</a>`:`<div class="tgfx">${inner}</div>`};
 fetch('tipimg.json').then(r=>r.json()).then(j=>{TIMG=j;if(bets.length){feed();next()}}).catch(()=>{});
 function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
 function stats(){const a=agg(bets);$('hpl').innerHTML=`<span class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</span>`;$('hsr').textContent=a.strike.toFixed(1)+'%';$('stats').innerHTML=`
@@ -235,8 +243,8 @@ function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink
 return `<div class="tip ${res==='Pending'?'pending':res}${isExcl(r)?' excl':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}${isExcl(r)?'<span class="mo">🔒 MEMBERS ONLY</span>':''}</span><span>${sdot(r)}<span class="chip ${res}">${res}</span><span class="lv hide" data-lv="${r._id}"></span></span></div>
 <div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}<small>DECIMAL</small></div></div>
 ${tipImg(r)}<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · <span class="rel">${rel(r)}</span>${bk?' · '+esc(bk):''}</div>
-${clvLine(r)}<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
-function seeFix(id){const r=bets.find(x=>x._id===id);document.querySelector('nav button[data-t=fix]').click();window.fxOpen&&window.fxOpen(r?r.league:'');document.querySelector('nav').scrollIntoView({behavior:'smooth'})}
+${clvLine(r)}<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}${res!=='Pending'&&/premier league|championship|champions league|ucl/i.test(r.league||'')&&!/scottish|welsh|irish|league one/i.test(r.league||'')?`<button class="share" onclick="seeFix(${r._id})">Fixture</button>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
+function seeFix(id){const r=bets.find(x=>x._id===id);document.querySelector('nav button[data-t=fix]').click();window.fxOpen&&window.fxOpen(r?r.league:'',id);document.querySelector('nav').scrollIntoView({behavior:'smooth'})}
 function feed(){const q=$('q').value.trim().toLowerCase(),L=$('fl').value,M=$('fm').value,R=$('fr').value,S=$('fs').value;
 const wk=monday(new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'}));view=bets.filter(r=>(!wkOnly||r.date>=wk)&&(!pendOnly||!settled(r))&&(!L||r.league===L)&&(!M||cat(r)===M.split(' ')[0])&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.market].join(' ').toLowerCase().includes(q)));
 $('count').textContent=`${view.length} of ${bets.length} picks`;
@@ -379,8 +387,11 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(
 </script>
 <script>
 (function(){
-const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/',K='pt_fd_token';let comp='PL',busy=false,n24=false;
+const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/',K='pt_fd_token';let comp='PL',busy=false,n24=true,focusId=0;
 const el=id=>document.getElementById(id),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ukD=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:'Europe/London'}),ukT=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
+const relT=x=>{if(x.status==='IN_PLAY')return 'LIVE';if(x.status==='PAUSED')return 'HT';if(x.status==='FINISHED')return 'FT';const t=new Date(x.utcDate),hm=ukT(t),dd=Math.round((Date.parse(ukD(t))-Date.parse(ukD(Date.now())))/864e5),diff=t-Date.now();if(diff<0)return Math.max(1,Math.round(-diff/36e5))+'h ago';if(dd===0)return (+hm.slice(0,2)>=17?'Tonight ':'Today ')+hm;if(dd===1)return 'Tomorrow '+hm;if(dd<7)return t.toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short'})+' '+hm;return t.toLocaleDateString('en-GB',{timeZone:'Europe/London',day:'numeric',month:'short'})+' '+hm};
+const scr=x=>{const f=x.score&&x.score.fullTime;return f&&f.home!=null?' '+f.home+'-'+f.away:''};
 const tok=()=>{try{return localStorage.getItem(K)||''}catch(e){return ''}};
 function stat(){el('fdstat').textContent=tok()?'Token saved in this browser ✓':'No token saved.'}
 function goHow(){document.querySelector('nav button[data-t=how]').click();el('fdtok').focus()}
@@ -393,27 +404,34 @@ async function get(path,ttl=600000){const ck='ptx_fd_'+path;try{const c=JSON.par
 const norm=t=>String(t||'').toLowerCase().replace(/\b(fc|afc|cf|sc|the)\b/g,'').replace(/united/g,'utd').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 const nameOk=(team,side)=>{const a=norm(side);return [team?.shortName,team?.name,team?.tla].some(n=>{const b=norm(n);return b&&a&&(a===b||a.includes(b)||b.includes(a)||a.split(' ')[0]===b.split(' ')[0]&&a.split(' ')[0].length>3)})};
 const sides=r=>String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);
-const sameDay=(r,x)=>{const d=new Date(x.utcDate).toLocaleDateString('en-CA',{timeZone:'Europe/London'});return r.date===d};
+const sameDay=(r,x)=>r.date===ukD(x.utcDate);
 const tipFor=x=>(window.ptxBets?window.ptxBets():[]).filter(r=>{const s=sides(r);return s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1])});
 const COMP=l=>/premier league/i.test(l)&&!/scottish|welsh|irish/i.test(l)?'PL':/championship/i.test(l)&&!/scottish|league one/i.test(l)?'ELC':/champions league|ucl/i.test(l)?'CL':'';
-window.fxOpen=l=>{const c=COMP(l||'');const b=c&&document.querySelector('.fx-sub button[data-c="'+c+'"]');if(b)b.click();else load()};
+window.fxOpen=(l,id)=>{focusId=id||0;const c=COMP(l||'');const b=c&&document.querySelector('.fx-sub button[data-c="'+c+'"]');if(b)b.click();else load()};
 window.fxLive=async function(){if(!tok())return;const pend=(window.ptxBets?window.ptxBets():[]).filter(r=>!['Won','Lost','Void'].includes(r.result)&&COMP(r.league||''));if(!pend.length)return;
  const today=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
  for(const c of [...new Set(pend.map(r=>COMP(r.league)))]){try{const m=await get(c+'/matches?dateFrom='+today+'&dateTo='+today,60000);
   pend.filter(r=>COMP(r.league)===c).forEach(r=>{const s=sides(r);const x=(m.matches||[]).find(x=>s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1]));if(!x)return;
    const sc=x.score?.fullTime,lab={IN_PLAY:'LIVE',PAUSED:'HT',FINISHED:'FT',TIMED:'KO '+new Date(x.utcDate).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}),SCHEDULED:'Scheduled',POSTPONED:'Postponed'}[x.status]||x.status;
    document.querySelectorAll('[data-sd="'+r._id+'"]').forEach(d=>d.classList.toggle('live',x.status==='IN_PLAY'||x.status==='PAUSED'));document.querySelectorAll('[data-lv="'+r._id+'"]').forEach(b=>{b.className='lv '+x.status;b.textContent=lab+(sc&&sc.home!=null?' '+sc.home+'-'+sc.away:'')})})}catch(e){}}};
+window.fxStrip=async function(){const box=el('fxstrip');if(!box)return;if(!tok()){box.innerHTML='';return}const now=Date.now(),out=[];
+ for(const c of ['PL','ELC','CL']){try{const m=await get(c+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000);(m.matches||[]).forEach(x=>{const t=new Date(x.utcDate)-now;if(t>-3*3600e3&&t<24*3600e3)out.push([c,x])})}catch(e){}}
+ out.sort((a,b)=>a[1].utcDate.localeCompare(b[1].utcDate));
+ box.innerHTML=out.length?'<span class="fxh">NEXT 24H</span>'+out.slice(0,12).map(([c,x])=>{const tp=tipFor(x);return '<a href="'+(tp.length?'#tip='+tp[0]._id:'#')+'" data-fxc="'+c+'">'+esc(x.homeTeam?.tla||x.homeTeam?.shortName)+' v '+esc(x.awayTeam?.tla||x.awayTeam?.shortName)+(tp.length?' <span class="tc" style="background:#c8ff00;color:#0a1628;border-radius:999px;padding:0 6px;font-size:10px;font-weight:900">TIP</span>':'')+'<small>'+esc(c)+' · '+esc(relT(x))+esc(/IN_PLAY|PAUSED/.test(x.status)?scr(x):'')+'</small></a>'}).join(''):'';
+ box.querySelectorAll('a[data-fxc]').forEach(a=>{if(a.getAttribute('href')==='#')a.onclick=e=>{e.preventDefault();window.fxOpen(c2l(a.dataset.fxc))}})};
+const c2l=c=>({PL:'Premier League',ELC:'Championship',CL:'Champions League'})[c];
 let again=false;async function load(){if(busy){again=true;return}if(!tok()){empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
  busy=true;el('fxbody').innerHTML='<div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div>';
  try{const [m,s]=await Promise.all([get(comp+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000),get(comp+'/standings',1800000)]);
   const all=(m.matches||[]),now=Date.now(),ms=(n24?all.filter(x=>{const t=new Date(x.utcDate)-now;return t>-3*3600e3&&t<24*3600e3}):all).slice(0,20);let h='<h3>Upcoming matches</h3>',last='';
   if(!ms.length)h+='<p class="note">'+(n24?'No matches in the next 24 hours.':'No upcoming matches listed.')+'</p>';
-  ms.forEach(x=>{const d=new Date(x.utcDate),day=d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});if(day!==last){h+='<div class="fxday">'+esc(day)+'</div>';last=day}
-   h+='<div class="fxm"><div class="row"><span class="t">'+esc(x.homeTeam?.shortName||x.homeTeam?.name)+' v '+esc(x.awayTeam?.shortName||x.awayTeam?.name)+'</span><span class="meta">'+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</span></div>'+(x.matchday?'<div class="meta">Matchday '+esc(x.matchday)+'</div>':'')+tipFor(x).map(r=>'<a class="fxtip" href="#tip='+r._id+'">Our tip: '+esc(r.selection)+' @ '+esc(r.odds)+' →</a>').join('<br>')+'</div>'});
+  ms.forEach(x=>{const d=new Date(x.utcDate),day=d.toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short'});if(day!==last){h+='<div class="fxday">'+esc(day)+'</div>';last=day}
+   const tp=tipFor(x),lv=/IN_PLAY|PAUSED/.test(x.status);
+   h+='<div class="fxm" data-tips=" '+tp.map(r=>r._id).join(' ')+' "><div class="row"><span class="t">'+esc(x.homeTeam?.shortName||x.homeTeam?.name)+' v '+esc(x.awayTeam?.shortName||x.awayTeam?.name)+(tp.length?'<a class="tc" href="#tip='+tp[0]._id+'">TIP</a>':'')+'</span><span class="fxst'+(lv?' live':'')+'">'+esc(relT(x))+(lv||x.status==='FINISHED'?esc(scr(x)):'')+'</span></div>'+tp.map(r=>'<a class="fxtip" href="#tip='+r._id+'">Our tip: '+esc(r.selection)+' @ '+esc(r.odds)+' →</a>').join('<br>')+'</div>'});
   const tb=((s.standings||[]).find(t=>t.type==='TOTAL')||{}).table||[];
   h+='<h3>Standings (top 10)</h3>';
   h+=tb.length?'<div class="scroll"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>'+tb.slice(0,10).map(r=>'<tr><td>'+r.position+'</td><td>'+esc(r.team?.shortName||r.team?.name)+'</td><td>'+r.playedGames+'</td><td>'+r.won+'</td><td>'+r.draw+'</td><td>'+r.lost+'</td><td>'+r.goalDifference+'</td><td><b>'+r.points+'</b></td></tr>').join('')+'</table></div>':'<p class="note">Standings not available.</p>';
-  el('fxbody').innerHTML=h}
+  el('fxbody').innerHTML=h;if(focusId){const f=document.querySelector('.fxm[data-tips~="'+focusId+'"]');if(f){if(!again)focusId=0;f.scrollIntoView({behavior:'smooth',block:'center'});f.classList.add('flash');setTimeout(()=>f.classList.remove('flash'),2500)}}}
  catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false;if(again){again=false;load()}}}
 document.addEventListener('click',e=>{if(e.target.closest('[data-gohow]')){e.preventDefault();goHow()}});
 document.querySelectorAll('.fx-sub button[data-c]').forEach(b=>b.addEventListener('click',()=>{comp=b.dataset.c;document.querySelectorAll('.fx-sub button[data-c]').forEach(x=>x.classList.toggle('on',x===b));load()}));
@@ -423,7 +441,7 @@ document.querySelector('nav button[data-t=fix]').addEventListener('click',load);
 el('fdsave').addEventListener('click',()=>{const v=el('fdtok').value.trim();if(!v)return;try{localStorage.setItem(K,v)}catch(e){}el('fdtok').value='';stat()});
 el('fdclear').addEventListener('click',()=>{try{localStorage.removeItem(K)}catch(e){}stat()});
 stat();
-setInterval(()=>window.fxLive&&window.fxLive(),120000);
+setInterval(()=>window.fxLive&&window.fxLive(),120000);setTimeout(()=>window.fxStrip&&window.fxStrip(),1500);setInterval(()=>window.fxStrip&&window.fxStrip(),120000);
 })();
 </script>
 </body></html>
