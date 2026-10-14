@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
-<meta name="ptx-version" content="v7"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="ptx-version" content="v8"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -67,24 +67,57 @@ h3{font-size:14px;color:var(--lime);margin:16px 0 6px;text-transform:uppercase;l
 .fxtip{display:inline-block;margin-top:4px;font-size:13px;font-weight:700;color:var(--lime)}
 .sumgrid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:640px){.sumgrid{grid-template-columns:1fr 1fr}}.sumgrid figure{margin:0;background:#000;border-radius:12px;padding:8px}.sumgrid img{width:100%;display:block;border-radius:8px}.sumgrid figcaption{display:flex;justify-content:space-between;align-items:center;padding-top:6px}
 #install{display:none}
+
+/* v8 premium theme */
+:root{--card:#0f1d33;--line:#1c2e4a;--ink:#000;--soft:#16263f}
+body{background:radial-gradient(1200px 600px at 50% -200px,#13284a 0%,var(--navy) 60%) fixed;-webkit-font-smoothing:antialiased}
+header{backdrop-filter:blur(10px);background:rgba(10,22,40,.88)}
+.lock{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}.lock .pt{width:38px;height:38px;border-radius:9px;background:#c8ff00;color:#0a1628;font-weight:900;font-size:19px;letter-spacing:-1px;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(200,255,0,.25)}
+.lock .wm{font-size:20px;line-height:1}.lock small{display:block;font-size:10px;letter-spacing:2px;color:var(--mute);font-weight:700;margin-top:3px}
+.hero .cta{font-size:15px;padding:12px}
+.cta,.btn,nav button,.preset,.share,.qa{transition:transform .12s ease,background .15s ease,color .15s ease,border-color .15s ease}
+.cta:hover{filter:brightness(1.06)}.btn:hover,.qa:hover{background:rgba(200,255,0,.1)}nav button:hover:not(.on){border-color:#3a5480}
+.tip{background:#000;border:1px solid #161d29;border-left:0;border-bottom:3px solid #c8ff00;border-radius:12px;padding:12px 14px 10px;margin-bottom:10px;transition:transform .15s ease,box-shadow .15s ease}
+.tip:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.tip .sel{font-size:17px;margin:2px 0;line-height:1.2}.tip .odds{font-size:30px;font-weight:900;line-height:1;letter-spacing:-1px;color:#fff}
+.tip .odds small{display:block;font-size:10px;letter-spacing:1px;color:var(--mute);font-weight:700;text-align:right}
+.tip .meta{font-size:12.5px}.tip.Lost{border-bottom-color:#3a2430}.tip.Void{border-bottom-color:#2a3b55}
+.tip.pending{border:1px solid #c8ff00;border-bottom:3px solid #c8ff00;box-shadow:0 0 18px rgba(200,255,0,.18)}
+.tip.excl{background:linear-gradient(180deg,#0b0f05,#000 40%)}
+.mo{display:inline-block;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 7px;border-radius:5px;border:1px solid #c8ff00;color:#c8ff00;margin-left:6px;vertical-align:middle}
+.spk{display:inline-block;vertical-align:middle;margin-left:6px}
+.qas{display:flex;gap:6px;margin-top:8px}.qa{flex:1;text-align:center;border:1px solid #2b3f60;border-radius:8px;padding:9px;color:#fff;text-decoration:none;font-weight:700;font-size:13px;background:transparent;cursor:pointer}
+.presets{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px}.preset{white-space:nowrap;background:transparent;border:1px solid #2b3f60;color:#fff;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer}.preset.on{border-color:#c8ff00;color:#c8ff00;background:rgba(200,255,0,.08)}
+#tips.fade>*{animation:fin .28s ease both}@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.sk{background:linear-gradient(90deg,#0f1d33 25%,#18304f 50%,#0f1d33 75%);background-size:200% 100%;animation:shim 1.2s infinite;border-radius:12px}@keyframes shim{to{background-position:-200% 0}}
+.sktip{height:118px;margin-bottom:10px}.skstat{height:76px}
+.clvh{background:#000;border:1px solid #1c2e4a;border-bottom:3px solid #c8ff00}.clvh h2{font-size:22px;color:#fff;text-transform:none;letter-spacing:-.3px}.clvh h2 em{font-style:normal;color:#c8ff00}
+#mk{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(min-width:640px){#mk{grid-template-columns:repeat(3,1fr)}}
+.mk{border-left:0;border-bottom:3px solid #c8ff00;border-radius:12px;margin:0}.mk.negm{border-bottom-color:#ff6b6b}.mk .kp{display:flex;justify-content:space-between;margin:8px 0 2px}.mk .kp b{display:block;font-size:22px;line-height:1.1}.mk .kp small{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.pin{background:#000;border:1px solid #1c2e4a;border-radius:12px;padding:10px 12px;margin:10px 0}.pin .ph{display:flex;justify-content:space-between;align-items:center}.pin h2{margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mute)}.pin .hw{margin:8px 0 0}
+.gate{background:#000;border:1px dashed #c8ff00;border-radius:12px;padding:14px;text-align:center}.gate b{color:#c8ff00}
+dialog{background:#0f1d33;color:#fff;border:1px solid #c8ff00;border-radius:14px;max-width:340px;width:90%}dialog::backdrop{background:rgba(0,0,0,.6)}dialog input{width:100%;margin:10px 0;background:#000;color:#fff;border:1px solid #2b3f60;border-radius:8px;padding:10px;font-size:16px;letter-spacing:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 
 <div id="toast"></div>
-<header><div class="wm">Pitch<span>Tips</span>X</div><div><button class="btn" id="install">Install app</button> <a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></div></header>
+<dialog id="mdlg"><form method="dialog" id="mform"><b style="font-size:17px">Members</b><p class="note" style="color:#fff">Enter the member code from the Telegram channel to see pending picks and Telegram exclusives.</p><input id="mcode" autocomplete="off" placeholder="Member code" aria-label="Member code"><p class="note" id="merr"></p><div style="display:flex;gap:6px"><button class="cta" style="flex:1;border:0" value="ok">Unlock</button><button class="btn" value="cancel">Cancel</button></div></form></dialog>
+<header><a class="lock" href="./" aria-label="PitchTipsX home"><span class="pt">PT</span><span><span class="wm">Pitch<span>Tips</span>X</span><small>MEMBER APP</small></span></a><div style="display:flex;gap:6px;align-items:center"><button class="btn" id="install">Install</button><button class="btn" id="mbtn">Members</button> <a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a></div></header>
 <main>
 <div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
 <p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results don't guarantee future returns.</p></div>
-<div class="hw" aria-label="How we bet"><div><b>1u = £5</b>Every stake in units</div><div><b>Best UK price</b>With bookmaker + time checked</div><div><b>Every bet logged</b>Losses included, nothing deleted</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div>
+<section class="clvh" id="clvhome"><h2>Beat the close: <em style="color:var(--mute)">early data</em></h2><div id="clvh"><p class="note" style="margin:0">Loading closing-price data…</p></div></section>
+<section class="pin" aria-label="How we bet"><div class="ph"><h2>How we bet</h2><button class="lnk" style="background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">Full rules →</button></div><div class="hw"><div><b>1u = £5</b>Every stake in units</div><div><b>Best UK price</b>With bookmaker + time checked</div><div><b>Every bet logged</b>Losses included, nothing deleted</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div></section>
 <div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
-<div class="stats" id="stats"><div class="stat"><small>Loading live record…</small></div></div>
-<section class="clvh" id="clvhome"><h2>Beat the close</h2><div id="clvh"><p class="note" style="margin:0">Loading closing-price data…</p></div></section>
+<div class="stats" id="stats"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div>
 <section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"></div><div id="chartinfo">Tap or hover the line for details.</div></section>
 <section class="excl"><h2>Telegram exclusive record</h2><div id="excl"></div><a class="cta" style="display:block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join Telegram</a></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
 <nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="cards">Cards</button><button data-t="fix">Fixtures</button><button data-t="how">How we bet</button></nav>
 <section id="feed"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
+<div class="presets" id="presets"><button class="preset" data-p="cards">Cards only</button><button class="preset" data-p="corners">Corners only</button><button class="preset" data-p="week">This week</button><button class="preset" data-p="pending">Pending</button><button class="preset" data-p="won">Winners</button><button class="preset" data-p="">Clear</button></div>
 <div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
-<div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"></div></section>
+<div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
 <section id="weeks" class="hide"><div class="scroll"><table id="wt"></table></div></section>
 <section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"></div><p class="note" id="mkother"></p></section>
 <section id="splits" class="hide"><h3>By league</h3><div class="scroll"><table id="lt"></table></div><h3>By month</h3><div class="scroll"><table id="mt"></table></div><p class="note">Settled picks only. Strike excludes voids; ROI = P/L ÷ total staked.</p></section>
@@ -130,7 +163,11 @@ const book=r=>{const m=String(r.notes||'').match(/\d\.\d+\s+([A-Z][A-Za-z0-9 /&'
 const xlink=r=>{const m=String(r.notes||'').match(/https:\/\/x\.com\/PitchTipsX\/status\/\d+/i);return m?m[0]:''};
 const koKey=r=>{const t=String(r.kickoff_uk||'').match(/(\d+):(\d+)(?::\d+)?\s*(am|pm)?/i);let h=0,mi=0;if(t){h=+t[1]%12;mi=+t[2];if(/pm/i.test(t[3]||''))h+=12;if(!t[3])h=+t[1]}return (r.date||'')+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')};
 const koShort=r=>koKey(r).slice(11);
-let bets=[],view=[],TIMG={};
+// TODO(Ted): change the member code here. Client-side only: the Google Sheet is public, so this is a soft gate, not security.
+const MEMBER_CODE='PITCH2026',MK='ptx_member';
+const isMember=()=>{try{return localStorage.getItem(MK)===MEMBER_CODE}catch(e){return false}};
+const isExcl=r=>String(r.posted||'').trim().toLowerCase()==='email';
+let bets=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false;
 const xid=r=>{const m=xlink(r).match(/status\/(\d+)/);return m?m[1]:''};
 const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:''};
 fetch('tipimg.json').then(r=>r.json()).then(j=>{TIMG=j;if(bets.length){feed();next()}}).catch(()=>{});
@@ -141,22 +178,35 @@ function stats(){const a=agg(bets);$('stats').innerHTML=`
 <div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
 <div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
 function opts(id,fn,label){const el=$(id),cur=el.value;const vals=[...new Set(bets.map(fn).filter(Boolean))].sort();el.innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');el.onchange=feed}
+function spkBuild(){SPK={};let cum=0;const pts=[];bets.filter(settled).slice().sort((a,b)=>koKey(a).localeCompare(koKey(b))||a._id-b._id).forEach(r=>{cum+=(money(r.profit_loss)||0)/UNIT;pts.push(cum);SPK[r._id]=pts.slice(-12)})}
+function spark(v,w=64,h=18){if(!v||v.length<2)return'';const mn=Math.min(...v,0),mx=Math.max(...v,0),rg=mx-mn||1;const X=i=>(i/(v.length-1)*(w-2)+1).toFixed(1),Y=x=>(h-1-(x-mn)/rg*(h-2)).toFixed(1);const last=v[v.length-1];
+return `<svg class="spk" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="Running P/L to this pick"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2b3f60" stroke-width="1"/><polyline fill="none" stroke="${last>=0?'#c8ff00':'#ff6b6b'}" stroke-width="1.6" points="${v.map((x,i)=>X(i)+','+Y(x)).join(' ')}"/></svg>`}
 function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink(r);
-return `<div class="tip ${res==='Pending'?'pending':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}</span><span><span class="chip ${res}">${res}</span><span class="lv hide" data-lv="${r._id}"></span></span></div>
-<div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}</div></div>
+return `<div class="tip ${res==='Pending'?'pending':res}${isExcl(r)?' excl':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}${isExcl(r)?'<span class="mo">🔒 MEMBERS ONLY</span>':''}</span><span><span class="chip ${res}">${res}</span><span class="lv hide" data-lv="${r._id}"></span></span></div>
+<div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}<small>DECIMAL</small></div></div>
 ${tipImg(r)}<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · KO ${esc(r.date)} ${koShort(r)}${bk?' · '+esc(bk):''}</div>
-<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div></div>`}
+<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
+function seeFix(id){const r=bets.find(x=>x._id===id);document.querySelector('nav button[data-t=fix]').click();window.fxOpen&&window.fxOpen(r?r.league:'');document.querySelector('nav').scrollIntoView({behavior:'smooth'})}
 function feed(){const q=$('q').value.trim().toLowerCase(),L=$('fl').value,M=$('fm').value,R=$('fr').value,S=$('fs').value;
-view=bets.filter(r=>(!L||r.league===L)&&(!M||cat(r)===M.split(' ')[0])&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.market].join(' ').toLowerCase().includes(q)));
+const wk=monday(new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'}));view=bets.filter(r=>(!wkOnly||r.date>=wk)&&(!pendOnly||!settled(r))&&(!L||r.league===L)&&(!M||cat(r)===M.split(' ')[0])&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.market].join(' ').toLowerCase().includes(q)));
 $('count').textContent=`${view.length} of ${bets.length} picks`;
-$('tips').innerHTML=view.map(r=>card(r,bets.indexOf(r))).join('')||'<p class="note">No picks match.</p>'}
-function next(){const p=bets.filter(r=>!settled(r)).sort((a,b)=>koKey(a).localeCompare(koKey(b)));
+const T=$('tips');T.classList.remove('fade');void T.offsetWidth;T.classList.add('fade');T.innerHTML=view.map(r=>card(r,bets.indexOf(r))).join('')||(pendOnly?'<p class="note">No pending picks right now. New picks land on Telegram first.</p>':!isMember()&&R==='Pending'?'<div class="gate">Pending picks are for <b>members</b>. <button class="btn" onclick="memberOpen()">Unlock</button></div>':'<p class="note">No picks match.</p>')}
+function preset(p){['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';wkOnly=false;pendOnly=false;
+const setSel=(id,v)=>{const o=[...$(id).options].find(o=>o.value===v||o.textContent===v);if(o)$(id).value=o.value};
+if(p==='cards')setSel('fm','Cards');if(p==='corners')setSel('fm','Corners');if(p==='won')setSel('fr','Won');if(p==='week')wkOnly=true;
+if(p==='pending'){if(!isMember()){memberOpen();return}pendOnly=true}
+document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('on',!!p&&b.dataset.p===p));feed()}
+function memberOpen(){$('merr').textContent='';$('mcode').value='';if($('mdlg').showModal)$('mdlg').showModal();else{const c=prompt('Member code');if(c)memberTry(c)}}
+function memberTry(c){if(String(c).trim().toUpperCase()===MEMBER_CODE){try{localStorage.setItem(MK,MEMBER_CODE)}catch(e){}toast('Welcome, member');memberUi();fromCache();refresh();return true}return false}
+function memberUi(){const m=isMember();$('mbtn').textContent=m?'Member ✓':'Members';$('mbtn').title=m?'Tap to sign out of member view':'Unlock member view'}
+function next(){if(!isMember()){$('next').innerHTML=`<div class="gate">${hiddenPending?`<b>${hiddenPending}</b> pending pick${hiddenPending>1?'s':''} right now · members only.`:'No pending picks right now.'}<br><span class="note">Members see pending picks and Telegram exclusives. Every pick lands on the public record once settled.</span><br><button class="cta" style="border:0;margin-top:8px" onclick="memberOpen()">Member login</button> <a class="btn" style="display:inline-block;margin-top:8px;text-decoration:none" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Get the code on Telegram</a></div>`;return}
+const p=bets.filter(r=>!settled(r)).sort((a,b)=>koKey(a).localeCompare(koKey(b)));
 $('next').innerHTML=p.length?p.map(r=>card(r,bets.indexOf(r))).join(''):'<p class="note" style="margin:0">No pending picks right now. New picks land on <a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Telegram</a> first.</p>'}
 function monday(d){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(0,10)}
 function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
 $('wt').innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
 function markets(){const s=bets.filter(settled);let h='';const mxu=Math.max(1,...[...CATS,'Other'].map(c=>Math.abs(agg(s.filter(r=>cat(r)===c)).pl/UNIT)));[...CATS,'Other'].forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(c==='Other'&&!rows.length)return;const a=agg(rows);
-h+=`<div class="mk"><div class="row"><b>${c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%;background:${a.strike>=50?'var(--lime)':'var(--coral)'}"></div></div>
+h+=`<div class="mk${a.pl<0?' negm':''}"><div class="row"><b>${c==='Other'?'Accas / builders':c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="kp"><div><small>Strike</small><b>${a.strike.toFixed(0)}%</b></div><div><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,0)}%</b></div><div><small>n</small><b>${rows.length}</b></div></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%;background:${a.strike>=50?'var(--lime)':'var(--coral)'}"></div></div>
 <div class="row meta"><span>Strike <b style="color:#fff">${a.strike.toFixed(1)}%</b></span><span class="${cls(a.pl)}"><b>${fmt(a.pl/UNIT)}u</b> (${gbp(a.pl)})</span></div><div class="pl" title="P/L in units"><span class="meta" style="width:30px">P/L</span><div class="half"><span class="zl"></span><i style="${a.pl>=0?'left:50%':'right:50%'};width:${(Math.min(Math.abs(a.pl/UNIT)/mxu,1)*50).toFixed(1)}%;background:${a.pl>=0?'var(--lime)':'var(--coral)'}"></i></div><span class="meta" style="width:46px;text-align:right">ROI ${fmt(a.roi,0)}%</span></div></div>`});
 $('mk').innerHTML=h;const o=s.filter(r=>cat(r)==='Other');$('mkother').textContent=o.length?`Other = ${o.length} settled picks whose market doesn't map to one category (${[...new Set(o.map(r=>r.market))].join(', ')}).`:''}
 function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!skip.includes(c)&&rows.some(r=>r[c]));
@@ -190,9 +240,9 @@ function setLive(){const el=$('live'),t=lastOk?lastOk.toLocaleTimeString('en-GB'
 $('livetxt').textContent=fails===0?`Live · updated ${t} UK`:lastOk?`Update failed · last updated ${t} UK · retrying`:'Couldn\'t load the live record · retrying'}
 const CK='ptx_bets_csv_v1';
 function render(txt){const raw=parse(txt);raw.forEach((r,i)=>r._id=i+2);
-bets=raw.filter(r=>r.date&&r.selection&&!(String(r.posted).toLowerCase()==='email'&&!settled(r)));
+const base=raw.filter(r=>r.date&&r.selection);const mem=isMember();bets=mem?base:base.filter(settled);hiddenPending=base.length-base.filter(settled).length;
 bets.sort((a,b)=>koKey(b).localeCompare(koKey(a))||b._id-a._id);
-stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>{const c=cat(r);return c==='Other'?'Other (accas/builders)':c},'market types');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();chart();excl();splits();deep();summaries();window.fxLive&&fxLive()}
+spkBuild();stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>{const c=cat(r);return c==='Other'?'Other (accas/builders)':c},'market types');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();chart();excl();splits();deep();summaries();window.fxLive&&fxLive()}
 function fromCache(){try{const c=JSON.parse(localStorage.getItem(CK)||'null');if(!c)return;render(c.txt);lastOk=new Date(c.t);fails=0;$('live').className='live warn';$('livetxt').textContent='Saved copy from '+lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'})+' UK · refreshing…'}catch(e){}}
 async function refresh(){try{const txt=await fetchTxt('Bets');render(txt);fails=0;lastOk=new Date();try{localStorage.setItem(CK,JSON.stringify({t:Date.now(),txt}))}catch(e){}}catch(e){fails++}setLive();
 load('Bankroll').then(r=>table($('bt'),r)).catch(()=>{});
@@ -234,8 +284,8 @@ else h+=`<p style="margin:10px 0"><b>Early data.</b> No true closing prices reco
 if(ap.n>0){h+=`<p class="note">${ap.n} older picks have approximate closes only (reconstructed from football-data closing odds or an earlier price check, not a true pre-kickoff close). They're listed for transparency and not counted above.</p><div class="scroll"><table><tr><th>Date</th><th>Pick</th><th>Posted</th><th>Close</th><th>CLV</th></tr>`+
  j.rows.filter(r=>r.approximate).map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.selection)}<div class="meta">${esc(r.match)}</div></td><td>${r.posted.toFixed(2)}</td><td>${r.closing.toFixed(2)}*</td><td class="${cls(r.clv_pct)}">${fmt(r.clv_pct,1)}%</td></tr>`).join('')+'</table></div><p class="note">* approximate close. CLV = posted ÷ close − 1.</p>'}
 h+=`<p class="note">Updated ${esc(j.generated_uk)} UK.</p>`;el.innerHTML=h}catch(e){el.innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>'}}
-function clvHome(j){const t=j.true||{},ap=j.approximate||{},n=+t.n||0,go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';let h;
-if(n>0&&t.avg_clv_pct!=null&&t.beat_pct!=null){const v=+t.avg_clv_pct,bp=+t.beat_pct,w=Math.min(Math.abs(v)/10,1)*50;
+function clvHome(j){const tr=(j.rows||[]).filter(r=>!r.approximate&&r.clv_pct!=null).sort((a,b)=>String(a.date).localeCompare(b.date));let acc=0;const avg=tr.map((r,i)=>(acc+= +r.clv_pct)/(i+1));const t=j.true||{},ap=j.approximate||{},n=+t.n||0,go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';let h;
+if(n>0&&t.avg_clv_pct!=null&&t.beat_pct!=null){const v=+t.avg_clv_pct,bp=+t.beat_pct,w=Math.min(Math.abs(v)/10,1)*50;$('clvhome').querySelector('h2').innerHTML=`Beat the close: <em class="${cls(v)}">${fmt(v,1)}%</em> ${spark(avg,90,24)}`;
 h=`<div class="big"><div><b class="${cls(v)}">${fmt(v,1)}%</b><div class="meta">average CLV</div></div><div class="gauge"><div class="gtrack"><span class="gf" style="${v>=0?'left:50%':'right:50%'};width:${w.toFixed(1)}%;background:${v>=0?'var(--lime)':'var(--coral)'}"></span><span class="gz"></span></div><div class="glab"><span>−10%</span><span>0</span><span>+10%</span></div></div></div>
 <div style="margin-top:10px"><div class="row meta"><span>Beat the close</span><b style="color:#fff">${bp.toFixed(0)}% of ${n}</b></div><div class="track"><div class="fill" style="width:${Math.min(bp,100)}%;background:${bp>=50?'var(--lime)':'var(--coral)'}"></div></div></div>`+(n<30?`<p class="note" style="margin:6px 0 0">Early data: ${n} true closes so far. Read it as a trend once we pass 30.</p>`:'')}
 else h=`<div class="big"><div><b>${n}</b><div class="meta">true closes recorded</div></div><div style="flex:1;min-width:180px"><b style="font-size:15px;display:block">Early data</b><span class="note" style="margin:0">We now snapshot the best UK price just before kickoff. Our CLV % and beat-the-close rate appear here as new picks settle.</span></div></div>`+(ap.n?`<div class="pillrow"><span class="pill">${ap.n} older picks with approximate closes (not counted)</span></div>`:'');
@@ -260,7 +310,11 @@ function deep(){const m=location.hash.match(/tip=(\d+)/);if(!m||deep.done===m[1]
 const el=document.querySelector(`#tips .tip[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash')}}
 window.addEventListener('hashchange',()=>{deep.done=null;deep()});
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','cards','fix','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
-$('q').oninput=feed;
+$('q').oninput=()=>{document.querySelectorAll('.preset').forEach(b=>b.classList.remove('on'));feed()};
+document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>preset(b.dataset.p));
+$('mbtn').onclick=()=>{if(isMember()){if(confirm('Leave member view on this device?')){try{localStorage.removeItem(MK)}catch(e){}memberUi();fromCache();refresh()}}else memberOpen()};
+$('mform').addEventListener('submit',e=>{if(e.submitter&&e.submitter.value==='cancel')return;if(!memberTry($('mcode').value)){e.preventDefault();$('merr').textContent='That code isn\'t right. Get the current code in the Telegram channel.'}});
+memberUi();
 fromCache();refresh();setInterval(refresh,90000);clvLoad();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
@@ -283,13 +337,14 @@ const sides=r=>String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);
 const sameDay=(r,x)=>{const d=new Date(x.utcDate).toLocaleDateString('en-CA',{timeZone:'Europe/London'});return r.date===d};
 const tipFor=x=>(window.ptxBets?window.ptxBets():[]).filter(r=>{const s=sides(r);return s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1])});
 const COMP=l=>/premier league/i.test(l)&&!/scottish|welsh|irish/i.test(l)?'PL':/championship/i.test(l)&&!/scottish|league one/i.test(l)?'ELC':/champions league|ucl/i.test(l)?'CL':'';
+window.fxOpen=l=>{const c=COMP(l||'');const b=c&&document.querySelector('.fx-sub button[data-c="'+c+'"]');if(b)b.click();else load()};
 window.fxLive=async function(){if(!tok())return;const pend=(window.ptxBets?window.ptxBets():[]).filter(r=>!['Won','Lost','Void'].includes(r.result)&&COMP(r.league||''));if(!pend.length)return;
  const today=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
  for(const c of [...new Set(pend.map(r=>COMP(r.league)))]){try{const m=await get(c+'/matches?dateFrom='+today+'&dateTo='+today,60000);
   pend.filter(r=>COMP(r.league)===c).forEach(r=>{const s=sides(r);const x=(m.matches||[]).find(x=>s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1]));if(!x)return;
    const sc=x.score?.fullTime,lab={IN_PLAY:'LIVE',PAUSED:'HT',FINISHED:'FT',TIMED:'KO '+new Date(x.utcDate).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}),SCHEDULED:'Scheduled',POSTPONED:'Postponed'}[x.status]||x.status;
    document.querySelectorAll('[data-lv="'+r._id+'"]').forEach(b=>{b.className='lv '+x.status;b.textContent=lab+(sc&&sc.home!=null?' '+sc.home+'-'+sc.away:'')})})}catch(e){}}};
-async function load(){if(busy)return;if(!tok()){empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
+let again=false;async function load(){if(busy){again=true;return}if(!tok()){empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
  busy=true;empty('Loading…');
  try{const [m,s]=await Promise.all([get(comp+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000),get(comp+'/standings',1800000)]);
   const all=(m.matches||[]),now=Date.now(),ms=(n24?all.filter(x=>{const t=new Date(x.utcDate)-now;return t>-3*3600e3&&t<24*3600e3}):all).slice(0,20);let h='<h3>Upcoming matches</h3>',last='';
@@ -300,7 +355,7 @@ async function load(){if(busy)return;if(!tok()){empty('<b>Add your free football
   h+='<h3>Standings (top 10)</h3>';
   h+=tb.length?'<div class="scroll"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>'+tb.slice(0,10).map(r=>'<tr><td>'+r.position+'</td><td>'+esc(r.team?.shortName||r.team?.name)+'</td><td>'+r.playedGames+'</td><td>'+r.won+'</td><td>'+r.draw+'</td><td>'+r.lost+'</td><td>'+r.goalDifference+'</td><td><b>'+r.points+'</b></td></tr>').join('')+'</table></div>':'<p class="note">Standings not available.</p>';
   el('fxbody').innerHTML=h}
- catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false}}
+ catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false;if(again){again=false;load()}}}
 document.addEventListener('click',e=>{if(e.target.closest('[data-gohow]')){e.preventDefault();goHow()}});
 document.querySelectorAll('.fx-sub button[data-c]').forEach(b=>b.addEventListener('click',()=>{comp=b.dataset.c;document.querySelectorAll('.fx-sub button[data-c]').forEach(x=>x.classList.toggle('on',x===b));load()}));
 el('fxre').addEventListener('click',()=>{try{Object.keys(localStorage).filter(k=>k.startsWith('ptx_fd_'+comp+'/')).forEach(k=>localStorage.removeItem(k))}catch(e){}load()});
