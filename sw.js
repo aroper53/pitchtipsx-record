@@ -1,7 +1,8 @@
-// PitchTipsX service worker v11.
+// PitchTipsX service worker v12.
 // Shell + static JSON + tip images: stale-while-revalidate (instant paint, refreshed in background).
 // Google Sheet CSV + football-data proxy: network first with a short timeout, cached copy when slow/offline.
-const CACHE='ptx-shell-v11',DATA='ptx-data-v11',IMG='ptx-img-v11';
+// Web push is delivered by the alerts worker. This file only displays the payload it sends.
+const CACHE='ptx-shell-v12',DATA='ptx-data-v12',IMG='ptx-img-v12';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./tipimg.json','https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{const keep=[CACHE,DATA,IMG];e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>!keep.includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -18,3 +19,9 @@ self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;c
  if(r.mode==='navigate'&&u.pathname.startsWith(scope.pathname)&&!u.pathname.startsWith(scope.pathname+'old/'))return e.respondWith(fetch(r).then(x=>{const y=x.clone();caches.open(CACHE).then(c=>c.put('./',y));return x}).catch(()=>caches.match('./')));
  if(SHELL.some(s=>new URL(s,scope).href===u.href))return e.respondWith(swr(r,CACHE));
 });
+self.addEventListener('push',e=>{let data={};try{data=e.data?e.data.json():{}}catch(err){data={body:e.data?e.data.text():''}}
+ const title=data.title||'',body=data.body||'';
+ if(!title&&!body)return;
+ e.waitUntil(self.registration.showNotification(title||'PitchTipsX',{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',data:{url:data.url||'./'}}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const url=(e.notification.data&&e.notification.data.url)||'./';
+ e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{const open=list.find(c=>c.url.includes(new URL('./',self.registration.scope).pathname));if(open)return open.focus();return clients.openWindow(url)}))});

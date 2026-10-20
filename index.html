@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
-<meta name="ptx-version" content="v11"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="ptx-version" content="v12"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -147,6 +147,20 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 #fxstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}#fxstrip:empty{display:none}#fxstrip .fxh{flex:0 0 auto;font-size:11px;font-weight:900;color:#c8ff00;align-self:center;letter-spacing:.06em}
 #fxstrip a{flex:0 0 auto;background:#000;border:1px solid var(--soft2);border-left:4px solid #c8ff00;border-radius:10px;padding:6px 10px;color:#fff;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap}#fxstrip a small{display:block;color:#8394ad;font-weight:700}
 .odl{margin-top:6px}.odr{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.op{background:#0a1628;border:1px solid var(--soft2);border-radius:8px;padding:3px 8px;font-size:12px;color:#fff;white-space:nowrap}.op i{font-style:normal;color:#8394ad;font-weight:800}.op b{color:#c8ff00;font-weight:900}.op em{font-style:normal;color:#8394ad;font-size:11px}.odu{font-size:11px;color:#8394ad;font-weight:700;margin-top:4px}.odu.st{color:#ffb020}
+.today,.pushbox{background:#000;border:1px solid var(--soft2);border-radius:14px;padding:12px 14px;margin:12px 0}
+.today h2,.pushbox h2{margin:0 0 8px;font-size:15px;letter-spacing:.4px;text-transform:uppercase}
+.tcards{display:grid;gap:8px}
+.tcard{background:#060c16;border:1px solid var(--soft2);border-left:4px solid #c8ff00;border-radius:12px;padding:10px 12px}
+.tcard .sel{font-weight:800;font-size:16px}
+.tcard .odds{color:#c8ff00;font-weight:900;font-size:22px}
+.cdown{font-weight:800;color:#fff}
+.xi{display:inline-block;margin-left:6px;font-size:10px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;border-radius:6px;padding:2px 7px;vertical-align:middle}
+.xi.Starts{background:#c8ff00;color:#0a1628}.xi.Benched{background:#ffd23f;color:#0a1628}.xi.Out{background:#ff6b6b;color:#0a1628}.xi.Pending{background:transparent;border:1px solid #c8ff00;color:#c8ff00}
+.chans{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:640px){.chans{grid-template-columns:1fr 1fr}}.chan .stats{grid-template-columns:1fr 1fr}
+.chan{background:#000;border:1px solid var(--soft2);border-radius:12px;padding:12px}
+.chan h3{margin:0 0 8px;color:#fff}
+.chan .cta{display:block;margin-top:10px}
+.ruleline{margin:8px 0 0;color:#cfd8e6}
 </style></head><body>
 
 <div id="toast"></div>
@@ -155,13 +169,15 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <main>
 <div class="hero"><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">📲 Picks first on Telegram: t.me/pitchtipsx</a>
 <p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results don't guarantee future returns.</p></div>
+<section class="today" id="todaybox" aria-label="Today"><h2>Today</h2><div id="today"><p class="note" style="margin:0">Loading today's picks…</p></div></section>
+<section class="pushbox" id="pushbox" aria-label="New pick alerts"><h2>New-pick alerts</h2><p class="note" id="pushcopy" style="margin-top:0">Opt in and the app can notify you when a new pick lands. On iPhone and iPad, add PitchTipsX to your Home Screen first (Share, then Add to Home Screen) and open it from that icon. iOS only delivers web push to the Home Screen app.</p><button class="btn" id="pushbtn" type="button">Turn on alerts</button><p class="note" id="pushstat"></p></section>
 <section class="hstrip" aria-label="Headline numbers"><div><span class="pt">PT</span></div><div><small>Current P/L</small><b id="hpl"><span class="sk skline" style="display:block;height:20px"></span></b></div><div><small>Strike rate</small><b id="hsr"><span class="sk skline" style="display:block;height:20px"></span></b></div><div><small>Beat the close</small><b id="hbc"><span class="sk skline" style="display:block;height:20px"></span></b></div></section>
 <section class="clvh" id="clvhome"><h2>Beat the close: <em style="color:var(--mute)">early data</em></h2><div id="clvh"><div class="sk skline"></div><div class="sk skline" style="width:70%"></div></div></section>
-<section class="pin" aria-label="How we bet"><div class="ph"><h2>How we bet</h2><button class="lnk" style="background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">Full rules →</button></div><div class="hw"><div><b>1u = £5</b>Every stake in units</div><div><b>Best UK price</b>With bookmaker + time checked</div><div><b>Every bet logged</b>Losses included, nothing deleted</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div></section>
+<section class="pin" aria-label="How we bet"><div class="ph"><h2>How we bet</h2><button class="lnk" style="background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">Full rules →</button></div><div class="hw"><div><b>1u = £5</b>Every stake in units</div><div><b>Best UK price</b>With bookmaker + time checked</div><div><b>Every bet logged</b>Losses included, nothing deleted</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div><p class="note ruleline"><b style="color:#fff">Fun accas</b> are just for fun, posted with no stake, and not tracked. <b style="color:#fff">Bet builders</b> with a real priced reason are staked and logged on the record like any other pick.</p></section>
 <div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
 <div class="stats" id="stats"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div>
 <section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"><div class="sk" style="height:220px"></div></div><div id="chartinfo">Tap or hover the line for details.</div></section>
-<section class="excl"><h2>Telegram exclusive record</h2><div id="excl"></div><a class="cta" style="display:block" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join Telegram</a></section>
+<section class="excl" aria-label="X and Telegram records"><h2>X vs Telegram</h2><p class="note" style="margin:0 0 8px">Settled picks only. posted = y is X. posted = telegram is Telegram only.</p><div class="chans" id="excl"></div></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
 <nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="cards">Cards</button><button data-t="fix">Fixtures</button><button data-t="how">How we bet</button></nav>
 <section id="feed"><div class="fbar" id="fbar"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
@@ -175,7 +191,7 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <section id="bank" class="hide"><div class="scroll"><table id="bt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="chal" class="hide"><p class="note">£10→£100 challenge: the whole pot rolls each step. A loss busts the run.</p><div class="scroll"><table id="ct"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="cards" class="hide"><p class="note">Shareable summary cards from the live record: this month, last month and each market. Settled picks only.</p><div class="sumgrid" id="sumgrid"><div class="sk" style="aspect-ratio:1"></div><div class="sk" style="aspect-ratio:1"></div></div></section>
-<section id="fix" class="hide"><div class="fx-sub"><button id="fx24" class="on">Next 24h</button><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button data-c="CL">Champions Lg</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Data: football-data.org, fetched with your own free token. Times in UK time (Europe/London).</p></section>
+<section id="fix" class="hide"><div class="fx-sub"><button id="fx24" class="on">Next 24h</button><button data-c="PL" class="on">Premier League</button><button data-c="ELC">Championship</button><button data-c="CL">Champions Lg</button><button class="btn" id="fxre" style="margin-left:auto">Refresh</button></div><div id="fxbody"></div><p class="note">Fixtures and live scores: football-data.org via the PitchTipsX proxy. No personal token. Best UK prices, including the Thursday Europa League and Conference League card, come from the odds file. Times in UK time (Europe/London).</p></section>
 <section id="how" class="hide"><div class="how"><h2 style="margin-top:0">How we bet</h2><ul>
 <li><b>Decimal odds</b> on everything.</li>
 <li><b>Best UK price</b>, quoted with the bookmaker and the time it was checked.</li>
@@ -183,12 +199,11 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <li><b>1u = £5.</b></li>
 <li><b>Staking:</b> flat stakes on most markets. Player shots, player shots on target and team corners use a model-based quarter-Kelly stake of 0.5–2u, and there's no bet under a 3% edge.</li>
 <li><b>One Telegram-exclusive pick a day.</b> It goes to Telegram first and is logged on the record after kickoff.</li>
-<li><b>Fun accas and bet builders</b> are just for fun. They're labelled as such and not tracked.</li>
+<li><b>Fun accas</b> are just for fun. They're posted with no stake and not tracked. <b>Bet builders</b> with a real priced reason are staked and logged on the record like any other pick.</li>
 <li><b>Closing-line value (CLV)</b> is tracked to check whether we beat the closing price.</li>
 <li><b>No profit promises.</b> Betting carries risk. Only stake what you can afford to lose.</li>
 <li><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b></li></ul>
-<h3>Fixtures tab: your football-data.org token</h3><p class="note" style="color:#fff">Get a free token at <a href="https://www.football-data.org/client/register" target="_blank" rel="noopener">football-data.org</a> (free tier: 10 calls/min). It's saved only in this browser.</p>
-<div class="tokbox"><input id="fdtok" type="password" placeholder="Paste your API token" autocomplete="off"><button class="btn" id="fdsave">Save</button><button class="btn" id="fdclear">Clear</button></div><p class="note" id="fdstat"></p></div></section>
+</div></section>
 </main>
 <footer><p><a href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join the Telegram channel</a> · <a href="https://x.com/PitchTipsX" target="_blank" rel="noopener">@PitchTipsX</a></p>
 <p><b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">18+ | GambleAware</a></b> · Please gamble responsibly. No profit is guaranteed.</p></footer>
@@ -210,15 +225,32 @@ const P=(lab,o)=>o?'<span class="op"><i>'+lab+'</i> <b>'+(+o.price).toFixed(2)+'
 function html(f){if(!f)return'';const h=f.h2h||{},t=f.ou25||{};const one=P('1',h.home)+P('X',h.draw)+P('2',h.away),two=P('O2.5',t.over)+P('U2.5',t.under);if(!one&&!two)return'';
  const st=age()>STALE,ip=Date.parse(f.kickoff)<Date.parse(O.fetched_at);
  return '<div class="odl">'+(one?'<div class="odr">'+one+'</div>':'')+(two?'<div class="odr">'+two+'</div>':'')+'<div class="odu'+(st?' st':'')+'">Best UK price · updated '+ukT(O.fetched_at)+' UK'+(ip?' · in-play price':'')+(st?' · may be out of date':'')+'</div></div>'}
+function fixtureOf(r){if(!O||!Array.isArray(O.fixtures))return null;const s=String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);if(s.length!==2)return null;return O.fixtures.find(f=>same(f.home,s[0])&&same(f.away,s[1])&&(/^\d{4}-\d{2}-\d{2}$/.test(r.date||'')?ukD(f.kickoff)===r.date:true))||null}
+function quote(r){const f=fixtureOf(r);if(!f)return null;const sel=String(r.selection||''),sl=sel.toLowerCase(),h=f.h2h||{},t=f.ou25||{};let o=null;
+ const teamOnly=s=>N(String(s||'').replace(/\b(to\s+)?win(ner)?\b/ig,'').trim());
+ const isTeam=team=>team&&teamOnly(sel)===N(team);
+ if(/^\s*draw\s*$/i.test(sel)&&h.draw)o=h.draw;
+ else if(/^\s*over\s*2\.5(\s*goals)?\s*$/i.test(sel)&&t.over)o=t.over;
+ else if(/^\s*under\s*2\.5(\s*goals)?\s*$/i.test(sel)&&t.under)o=t.under;
+ else if(/\b(win|winner)\b/i.test(sel)&&isTeam(f.home)&&h.home)o=h.home;
+ else if(/\b(win|winner)\b/i.test(sel)&&isTeam(f.away)&&h.away)o=h.away;
+ else if(isTeam(f.home)&&h.home)o=h.home;
+ else if(isTeam(f.away)&&h.away)o=h.away;
+ if(!o||!(+o.price>1))return null;return{price:+o.price,book:o.book||'',at:O.fetched_at,stale:age()>STALE}}
+function euroHtml(){if(!O||!Array.isArray(O.fixtures))return'';const now=Date.now(),fs=O.fixtures.filter(f=>/europa|conference/i.test(f.league||'')&&(()=>{const t=Date.parse(f.kickoff)-now;return t>-3*3600e3&&t<8*864e5})());
+ if(!fs.length)return'';let h='<h3>Europa League and Conference League</h3>',last='';
+ fs.sort((a,b)=>String(a.kickoff).localeCompare(String(b.kickoff))).forEach(f=>{const d=new Date(f.kickoff).toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short'});if(d!==last){h+='<div class="fxday">'+esc(d)+'</div>';last=d}
+  h+='<div class="fxm"><div class="row"><span class="t">'+esc(f.home)+' v '+esc(f.away)+'</span><span class="fxst">'+esc(f.league)+' · '+ukT(f.kickoff)+'</span></div>'+html(f)+'</div>'});return h}
 window.ptxOdds={
  fx:(home,away,when)=>html(find(home,away,when)),
  tip:r=>{const s=String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);if(s.length!==2)return'';return html(find(s[0],s[1],null,/^\d{4}-\d{2}-\d{2}$/.test(r.date||'')?r.date:null))},
- list:()=>{if(!ok())return'';const now=Date.now(),fs=O.fixtures.filter(f=>{const t=Date.parse(f.kickoff)-now;return t>-2*3600e3&&t<24*3600e3});if(!fs.length)return'';let h='<h3>Next 24h · best UK prices</h3>',last='';
+ quote,euro:euroHtml,
+ list:()=>{if(!O||!Array.isArray(O.fixtures))return'';const now=Date.now(),fs=O.fixtures.filter(f=>{const t=Date.parse(f.kickoff)-now;return t>-2*3600e3&&t<24*3600e3});if(!fs.length)return'';let h='<h3>Next 24h · best UK prices</h3>',last='';
   fs.forEach(f=>{const d=new Date(f.kickoff).toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short'});if(d!==last){h+='<div class="fxday">'+esc(d)+'</div>';last=d}
    h+='<div class="fxm"><div class="row"><span class="t">'+esc(f.home)+' v '+esc(f.away)+'</span><span class="fxst">'+esc(f.league)+' · '+ukT(f.kickoff)+'</span></div>'+html(f)+'</div>'});return h},
- ready:()=>!!ok()};
-fetch('odds.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{O=j;try{if(window.ptxBets&&ptxBets().length){feed();next()}}catch(e){}
- const fx=document.getElementById('fix');if(fx&&!fx.classList.contains('hide'))document.querySelector('nav button[data-t=fix]').click()}).catch(()=>{});
+ ready:()=>!!(O&&Array.isArray(O.fixtures))};
+fetch('odds.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{O=j;try{if(window.ptxBets&&ptxBets().length){feed();next();window.ptxToday&&ptxToday()}}catch(e){}
+ const fx=document.getElementById('fix');if(fx&&!fx.classList.contains('hide')&&window.fxReload)window.fxReload()}).catch(()=>{});
 })();
 </script>
 <script>
@@ -245,7 +277,8 @@ const koShort=r=>koKey(r).slice(11);
 // TODO(Ted): change the member code here. Client-side only: the Google Sheet is public, so this is a soft gate, not security.
 const MEMBER_CODE='PITCH2026',MK='ptx_member';
 const isMember=()=>{try{return localStorage.getItem(MK)===MEMBER_CODE}catch(e){return false}};
-const isExcl=r=>String(r.posted||'').trim().toLowerCase()==='email';
+const isExcl=r=>['telegram','email'].includes(String(r.posted||'').trim().toLowerCase());
+const postCh=r=>{const p=String(r.posted||'').trim().toLowerCase();return p==='y'?'x':p==='telegram'?'tg':''};
 let CLVM={};
 const ukToday=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
 const ukNowMin=()=>{const t=new Date().toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');return +t[0]*60+ +t[1]};
@@ -254,7 +287,7 @@ if(diff>=0){if(dd===0)return (km>=17*60?'Tonight ':'Today ')+hm;if(dd===1)return
 const m=-diff;if(m<60)return m+'m ago';if(m<1440)return Math.round(m/60)+'h ago';if(m<7*1440)return Math.round(m/1440)+'d ago';return new Date(d+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
 const sdot=r=>{const x=resOf(r);return `<span class="sd ${x==='Won'?'won':x==='Lost'?'lost':x==='Void'?'void':'pend'}" data-sd="${r._id}" title="${x}"></span>`};
 const clvLine=r=>{const c=CLVM[((r.date||'')+'|'+(r.selection||'')).toLowerCase()];return c?`<div class="clvl">CLV <b class="${cls(+c.clv_pct)}">${fmt(+c.clv_pct,1)}%</b> · posted ${(+c.posted).toFixed(2)} v close ${(+c.closing).toFixed(2)}</div>`:''};
-let bets=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false;
+let bets=[],allRows=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false,trackerReady=false;
 const xid=r=>{const m=xlink(r).match(/status\/(\d+)/);return m?m[1]:''};
 const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:tgfx(r)};
 const tgfx=r=>{const lk=xlink(r),inner=`<span class="tgk">${esc(slipType(r))} · ${esc(r.market)}</span><span class="tgs">${esc(r.selection)}</span><span class="tgu"></span><span class="tgo">${esc(r.odds)}</span><span class="tgl">Decimal odds · @PitchTipsX · 18+ | GambleAware</span>`;return lk?`<a class="tgfx" href="${lk}" target="_blank" rel="noopener" aria-label="Open the X post">${inner}</a>`:`<div class="tgfx">${inner}</div>`};
@@ -329,9 +362,9 @@ function setLive(){const el=$('live'),t=lastOk?lastOk.toLocaleTimeString('en-GB'
 $('livetxt').textContent=fails===0?`Live · updated ${t} UK`:lastOk?`Update failed · last updated ${t} UK · retrying`:'Couldn\'t load the live record · retrying'}
 const CK='ptx_bets_csv_v1';
 function render(txt){const raw=parse(txt);raw.forEach((r,i)=>r._id=i+2);
-const base=raw.filter(r=>r.date&&r.selection);const mem=isMember();bets=mem?base:base.filter(settled);hiddenPending=base.length-base.filter(settled).length;
+const base=raw.filter(r=>r.date&&r.selection);allRows=base;const mem=isMember();bets=mem?base:base.filter(settled);hiddenPending=base.length-base.filter(settled).length;trackerReady=true;
 bets.sort((a,b)=>koKey(b).localeCompare(koKey(a))||b._id-a._id);
-spkBuild();stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>{const c=cat(r);return c==='Other'?'Other (accas/builders)':c},'market types');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();weeks();markets();chart();excl();splits();deep();summaries();window.fxLive&&fxLive()}
+spkBuild();stats();opts('fl',r=>r.league,'leagues');opts('fm',r=>{const c=cat(r);return c==='Other'?'Other (accas/builders)':c},'market types');opts('fr',resOf,'results');opts('fs',slipType,'slip types');feed();next();today();weeks();markets();chart();excl();splits();deep();summaries();window.fxLive&&fxLive();if(CLVJ)clvHome(CLVJ)}
 function fromCache(){try{const c=JSON.parse(localStorage.getItem(CK)||'null');if(!c)return;render(c.txt);lastOk=new Date(c.t);fails=0;$('live').className='live warn';$('livetxt').textContent='Saved copy from '+lastOk.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'})+' UK · refreshing…'}catch(e){}}
 async function refresh(){try{const txt=await fetchTxt('Bets');render(txt);fails=0;lastOk=new Date();try{localStorage.setItem(CK,JSON.stringify({t:Date.now(),txt}))}catch(e){}}catch(e){fails++}setLive();
 load('Bankroll').then(r=>table($('bt'),r)).catch(()=>{});
@@ -359,26 +392,59 @@ const pp=money(p.r.profit_loss)||0;info.innerHTML=`${esc(p.r.date)} · ${esc(p.r
 sv.addEventListener('pointermove',pick);sv.addEventListener('pointerdown',pick);sv.addEventListener('touchmove',pick,{passive:true});
 info.innerHTML=`Now: <b class="${cls(last)}">${fmt(last)}u</b> (${gbp(last*UNIT)}) over ${pts.length} settled picks. Tap or drag on the chart for details.`}
 let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(bets.length)chart()},150)});
-function excl(){const rows=bets.filter(r=>String(r.posted).toLowerCase()==='email'&&settled(r));
-if(!rows.length){$('excl').innerHTML='<p class="note" style="margin:4px 0 10px">One pick a day goes to Telegram only. No exclusive picks have settled yet. Their record will show here, wins and losses, once they do.</p>';return}
-const a=agg(rows);$('excl').innerHTML=`<div class="nums"><div><small class="meta">W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div><div><small class="meta">P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div><small class="meta">Strike</small><b>${a.strike.toFixed(1)}%</b></div></div><p class="note" style="margin:0 0 10px">Telegram-only picks, logged after kickoff. ${rows.length} settled. ${gbp(a.pl)} at 1u = £5.</p>`}
+function xiBadge(r){const n=String(r.notes||'')+' '+String(r.why||'');
+if(/\b(not in (the )?(matchday )?squad|ruled out|left out of)\b/i.test(n))return 'Out';
+if(/\bon the bench\b|\bbenched\b/i.test(n))return 'Benched';
+if(/\b(starts|started|confirmed XI)\b/i.test(n))return 'Starts';
+if(/\b(line-?up|team news|xi) pending\b/i.test(n))return 'Pending';
+return ''}
+function kickLine(r){const raw=String(r.kickoff_uk||'').trim();if(!raw)return 'Kickoff time isn\'t on the tracker';
+const hm=koShort(r),d=r.date||'';if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!/^\d{2}:\d{2}$/.test(hm))return esc(raw);
+const diff=(+hm.slice(0,2)*60+ +hm.slice(3)+(Math.round((Date.parse(d)-Date.parse(ukToday()))/864e5))*1440)-ukNowMin();
+if(diff>0){const h=Math.floor(diff/60),m=diff%60;return 'Kicks off in '+(h?h+'h ':'')+m+'m · '+hm+' UK'}
+if(diff>-110)return 'Kicked off · '+hm+' UK';
+return 'KO '+hm+' UK'}
+function bestLine(r){if(!window.ptxOdds||!ptxOdds.quote)return'';const q=ptxOdds.quote(r);if(!q)return'';
+const t=new Date(q.at).toLocaleString('en-GB',{timeZone:'Europe/London',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+return `<div class="meta">Best ${q.price.toFixed(2)}${q.book?' · '+esc(q.book):''} · checked ${esc(t)} UK${q.stale?' · may be out of date':''}</div>`}
+function todayCard(r){const xi=xiBadge(r);return `<article class="tcard"><div class="row"><div class="sel">${esc(r.selection)}${xi?`<span class="xi ${xi}">${xi}</span>`:''}</div><div class="odds">${esc(r.odds)}</div></div><div class="meta">${esc(r.match)}${r.league?' · '+esc(r.league):''}</div><div class="cdown">${kickLine(r)}</div><div class="meta">Posted ${esc(r.odds)}</div>${bestLine(r)}</article>`}
+function today(){const box=$('today');if(!box||!trackerReady)return;const day=ukToday(),rows=allRows.filter(r=>r.date===day);
+const label=new Date(day+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'});
+if(!rows.length){box.innerHTML=`<div class="empty"><b>No picks today</b> <span class="meta">(${label} UK)</span><br><span class="note">New picks land on Telegram first.</span><br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">t.me/pitchtipsx</a></div>`;return}
+const pend=rows.filter(r=>!settled(r)),done=rows.filter(settled);
+if(!isMember()&&pend.length&&!done.length){box.innerHTML=`<div class="gate"><b>${pend.length}</b> pick${pend.length>1?'s':''} today · members only.<br><span class="note">${label} UK. Pending picks stay behind the member gate.</span><br><button class="cta" style="border:0;margin-top:8px" onclick="memberOpen()">Member login</button></div>`;return}
+let h=`<p class="note" style="margin:0 0 8px">${label} UK</p>`;
+if(!isMember()&&pend.length)h+=`<div class="gate" style="margin-bottom:8px"><b>${pend.length}</b> pending pick${pend.length>1?'s':''} today stay behind the member gate. <button class="btn" onclick="memberOpen()">Unlock</button></div>`;
+h+=(isMember()?rows:done).sort((a,b)=>koKey(a).localeCompare(koKey(b))).map(todayCard).join('');
+box.innerHTML=h}
+window.ptxToday=today;
+function chanTile(title,rows,cta){const a=agg(rows);return `<div class="chan"><h3>${esc(title)}</h3><div class="stats"><div class="stat"><small>Picks</small><b>${rows.length}</b></div><div class="stat"><small>W-L-V</small><b>${a.w}-${a.l}-${a.v}</b></div><div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div><div class="stat"><small>P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div></div>${cta||''}</div>`}
+function excl(){const s=bets.filter(settled),x=s.filter(r=>postCh(r)==='x'),tg=s.filter(r=>postCh(r)==='tg'),other=s.length-x.length-tg.length;
+$('excl').innerHTML=chanTile('X',x)+chanTile('Telegram only',tg,`<a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">t.me/pitchtipsx</a>`)+(other?`<p class="note" style="grid-column:1/-1;margin:0">${other} settled pick${other>1?'s':''} ${other>1?'were':'was'} not posted to X or Telegram, so ${other>1?'they are':'it is'} not in either tile.</p>`:'')}
 function splitTable(el,key,label){const g={};bets.filter(settled).forEach(r=>{const k=key(r)||'—';(g[k]??=[]).push(r)});
 el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
 function splits(){splitTable($('lt'),r=>r.league,'League');splitTable($('mt'),r=>/^\d{4}-\d{2}/.test(r.date)?new Date(r.date.slice(0,7)+'-15').toLocaleDateString('en-GB',{month:'short',year:'numeric'})+' ('+r.date.slice(0,7)+')':'',  'Month')}
-async function clvLoad(){const el=$('clvbody');try{const j=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});
-const t=j.true,ap=j.approximate;clvHome(j);let h='';
-if(t.n>0){h+=`<div class="stats" style="margin:10px 0"><div class="stat"><small>Closes checked</small><b>${t.n}</b></div><div class="stat"><small>Beat the close</small><b>${t.beat_pct}%</b></div><div class="stat"><small>Average CLV</small><b class="${cls(t.avg_clv_pct)}">${fmt(t.avg_clv_pct,1)}%</b></div></div>`;
- if(t.n<30)h+=`<p class="note">Early data: only ${t.n} true closes so far. Read this as a trend once we pass 30.</p>`}
-else h+=`<p style="margin:10px 0"><b>Early data.</b> No true closing prices recorded yet. We now snapshot the best UK price shortly before kickoff, so headline CLV numbers will appear here as new picks settle.</p>`;
-if(ap.n>0){h+=`<p class="note">${ap.n} older picks have approximate closes only (reconstructed from football-data closing odds or an earlier price check, not a true pre-kickoff close). They're listed for transparency and not counted above.</p><div class="scroll"><table><tr><th>Date</th><th>Pick</th><th>Posted</th><th>Close</th><th>CLV</th></tr>`+
- j.rows.filter(r=>r.approximate).map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.selection)}<div class="meta">${esc(r.match)}</div></td><td>${r.posted.toFixed(2)}</td><td>${r.closing.toFixed(2)}*</td><td class="${cls(r.clv_pct)}">${fmt(r.clv_pct,1)}%</td></tr>`).join('')+'</table></div><p class="note">* approximate close. CLV = posted ÷ close − 1.</p>'}
-h+=`<p class="note">Updated ${esc(j.generated_uk)} UK.</p>`;el.innerHTML=h}catch(e){el.innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>';$('hbc').innerHTML='<span class="ed">Unavailable</span>'}}
-function clvHome(j){{const t0=j.true||{};$('hbc').innerHTML=(+t0.n>0&&t0.avg_clv_pct!=null)?`<span class="${cls(+t0.avg_clv_pct)}">${fmt(+t0.avg_clv_pct,1)}%</span>`:`<span class="ed">Early data</span><small>${+t0.n||0} true closes</small>`;CLVM={};(j.rows||[]).filter(r=>!r.approximate&&r.clv_pct!=null).forEach(r=>CLVM[(r.date+'|'+r.selection).toLowerCase()]=r);if(bets.length){feed();next()}}const tr=(j.rows||[]).filter(r=>!r.approximate&&r.clv_pct!=null).sort((a,b)=>String(a.date).localeCompare(b.date));let acc=0;const avg=tr.map((r,i)=>(acc+= +r.clv_pct)/(i+1));const t=j.true||{},ap=j.approximate||{},n=+t.n||0,go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';let h;
-if(n>0&&t.avg_clv_pct!=null&&t.beat_pct!=null){const v=+t.avg_clv_pct,bp=+t.beat_pct,w=Math.min(Math.abs(v)/10,1)*50;$('clvhome').querySelector('h2').innerHTML=`Beat the close: <em class="${cls(v)}">${fmt(v,1)}%</em> ${spark(avg,90,24)}`;
-h=`<div class="big"><div><b class="${cls(v)}">${fmt(v,1)}%</b><div class="meta">average CLV</div></div><div class="gauge"><div class="gtrack"><span class="gf" style="${v>=0?'left:50%':'right:50%'};width:${w.toFixed(1)}%;background:${v>=0?'var(--lime)':'var(--coral)'}"></span><span class="gz"></span></div><div class="glab"><span>−10%</span><span>0</span><span>+10%</span></div></div></div>
-<div style="margin-top:10px"><div class="row meta"><span>Beat the close</span><b style="color:#fff">${bp.toFixed(0)}% of ${n}</b></div><div class="track"><div class="fill" style="width:${Math.min(bp,100)}%;background:${bp>=50?'var(--lime)':'var(--coral)'}"></div></div></div>`+(n<30?`<p class="note" style="margin:6px 0 0">Early data: ${n} true closes so far. Read it as a trend once we pass 30.</p>`:'')}
-else h=`<div class="big"><div><b>${n}</b><div class="meta">true closes recorded</div></div><div style="flex:1;min-width:180px"><b style="font-size:15px;display:block">Early data</b><span class="note" style="margin:0">We now snapshot the best UK price just before kickoff. Our CLV % and beat-the-close rate appear here as new picks settle.</span></div></div>`+(ap.n?`<div class="pillrow"><span class="pill">${ap.n} older picks with approximate closes (not counted)</span></div>`:'');
-$('clvh').innerHTML=h+go}
+let CLVJ=null;
+const clvNorm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+function trueCloses(j){return ((j&&j.rows)||[]).filter(r=>r&&r.approximate!==true&&isFinite(+r.posted)&&isFinite(+r.closing)&&+r.posted>1&&+r.closing>1).map(r=>({...r,clv_pct:(+r.posted/+r.closing-1)*100}))}
+function clvHit(row,bet){if(String(row.date||'')!==String(bet.date||''))return false;if(clvNorm(row.selection)!==clvNorm(bet.selection))return false;if(row.match&&bet.match){const a=clvNorm(row.match),b=clvNorm(bet.match);if(a!==b&&!a.includes(b)&&!b.includes(a))return false}return true}
+async function clvLoad(){try{CLVJ=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});clvHome(CLVJ)}catch(e){$('clvbody').innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>';$('hbc').innerHTML='<span class="ed">Unavailable</span>'}}
+function clvHome(j){const rows=trueCloses(j),sett=bets.filter(settled),matched=sett.filter(b=>rows.some(r=>clvHit(r,b)));
+CLVM={};matched.forEach(b=>{const r=rows.find(x=>clvHit(x,b));CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()]=r});
+const n=matched.length,N=sett.length,avg=n?matched.reduce((s,b)=>s+(+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()].clv_pct),0)/n:null;
+const beat=n?matched.filter(b=>+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()].clv_pct>0).length/n*100:null;
+const cover=N?`based on ${n} of ${N} picks with a recorded close`:(n?`${n} recorded close${n>1?'s':''}. Waiting for the record to count settled picks.`:'No settled picks loaded yet.');
+const go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';
+if(n&&avg!=null){const w=Math.min(Math.abs(avg)/10,1)*50,ord=matched.slice().sort((a,b)=>koKey(a).localeCompare(koKey(b)));let acc=0;const run=ord.map((b,i)=>(acc+=+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()].clv_pct)/(i+1));
+$('hbc').innerHTML=`<span class="${cls(avg)}">${fmt(avg,1)}%</span><small>${n} of ${N}</small>`;
+$('clvhome').querySelector('h2').innerHTML=`Beat the close: <em class="${cls(avg)}">${fmt(avg,1)}%</em> ${spark(run,90,24)}`;
+$('clvh').innerHTML=`<div class="big"><div><b class="${cls(avg)}">${fmt(avg,1)}%</b><div class="meta">average CLV</div></div><div class="gauge"><div class="gtrack"><span class="gf" style="${avg>=0?'left:50%':'right:50%'};width:${w.toFixed(1)}%;background:${avg>=0?'var(--lime)':'var(--coral)'}"></span><span class="gz"></span></div><div class="glab"><span>−10%</span><span>0</span><span>+10%</span></div></div></div><p class="note" style="margin:8px 0 0">${cover}. Beat the close ${beat.toFixed(0)}%.</p>`+go}
+else{$('hbc').innerHTML=`<span class="ed">No close</span><small>${n} of ${N||0}</small>`;$('clvhome').querySelector('h2').innerHTML='Beat the close: <em>no recorded closes</em>';
+$('clvh').innerHTML=`<div class="big"><div><b>0</b><div class="meta">recorded closes</div></div><div style="flex:1;min-width:180px"><span class="note" style="margin:0">${cover}. Bets with no recorded closing price are left out. Nothing is estimated.</span></div></div>`+go}
+const lines=matched.slice().sort((a,b)=>koKey(b).localeCompare(koKey(a))).map(b=>{const r=CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()];return `<tr><td>${esc(b.date)}</td><td>${esc(b.selection)}<div class="meta">${esc(b.match)}</div></td><td>${(+r.posted).toFixed(2)}</td><td>${(+r.closing).toFixed(2)}</td><td class="${cls(r.clv_pct)}">${fmt(+r.clv_pct,1)}%</td></tr>`}).join('');
+const skipped=(j&&j.approximate&&+j.approximate.n)||((j&&j.rows)||[]).filter(r=>r&&r.approximate===true).length;
+$('clvbody').innerHTML=(n?`<div class="stats" style="margin:10px 0"><div class="stat"><small>Included</small><b>${n} of ${N}</b></div><div class="stat"><small>Beat the close</small><b>${beat.toFixed(0)}%</b></div><div class="stat"><small>Average CLV</small><b class="${cls(avg)}">${fmt(avg,1)}%</b></div></div><p class="note">${cover}.</p><div class="scroll"><table><tr><th>Date</th><th>Pick</th><th>Posted</th><th>Close</th><th>CLV</th></tr>${lines}</table></div>`:`<p style="margin:10px 0"><b>${cover}.</b> Bets with no recorded closing price are left out and never estimated.</p>`)+(skipped?`<p class="note">${skipped} older rows are marked approximate (reconstructed, or not a true pre-kickoff close) and are not counted.</p>`:'')+`<p class="note">CLV % = posted ÷ close − 1. Updated ${esc((j&&j.generated_uk)||'')} UK.</p>`;
+if(bets.length){feed();next();today()}}
 
 let sumBlobs=[];
 async function summaries(){const el=$('sumgrid');if(!el)return;const s=bets.filter(settled),mk=k=>s.filter(r=>r.date&&r.date.startsWith(k));
@@ -412,25 +478,42 @@ const b=document.createElement('div');b.id='a2hs';b.setAttribute('role','dialog'
 b.innerHTML=`<span class="pt" style="width:30px;height:30px;border-radius:7px;background:#0a1628;color:#fff;font-weight:900;font-size:13px;display:grid;place-items:center;box-shadow:inset 0 -3px 0 #c8ff00;border:1px solid rgba(255,255,255,.1)">PT</span><p>${ios?'Add PitchTipsX to your Home Screen: tap Share, then <b>Add to Home Screen</b>.':'Add PitchTipsX to your Home Screen for one-tap access.'}</p>${ios?'':'<button class="btn" id="a2go">Add</button>'}<button class="x" aria-label="Dismiss">×</button>`;
 document.body.appendChild(b);const off=()=>{try{localStorage.setItem('ptx_a2hs_off','1')}catch(e){}b.remove()};b.querySelector('.x').onclick=off;
 const go=b.querySelector('#a2go');if(go)go.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;off()}else toast('Use your browser menu → Add to Home Screen / Install app')}})();
-fromCache();refresh();setInterval(refresh,90000);clvLoad();
+const PUSH='https://pitchtipsx-push.aroper53.workers.dev';
+function b64url(s){const pad='='.repeat((4-s.length%4)%4);const b=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+async function pushInit(){const btn=$('pushbtn'),stat=$('pushstat');if(!btn)return;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+const set=t=>{stat.textContent=t};
+if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){btn.disabled=true;set('This browser cannot receive web push.');return}
+if(ios&&!standalone){btn.textContent='Add to Home Screen first';btn.onclick=()=>set('On iPhone and iPad, tap Share, then Add to Home Screen, and open PitchTipsX from that icon. Alerts cannot be turned on in the Safari tab.');return}
+btn.onclick=async()=>{btn.disabled=true;set('Checking the alerts service…');
+ try{const reg=await navigator.serviceWorker.ready;const keyRes=await fetch(PUSH+'/vapid-public-key',{cache:'no-store'});
+  if(!keyRes.ok)throw new Error('The alerts service has no VAPID key yet (HTTP '+keyRes.status+').');
+  const key=await keyRes.json();const pub=key.publicKey||key.key;if(!pub)throw new Error('The alerts service did not return a VAPID public key.');
+  const perm=await Notification.requestPermission();if(perm!=='granted'){set('Alerts stay off until you allow notifications.');btn.disabled=false;return}
+  const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64url(pub)});
+  const save=await fetch(PUSH+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub)});
+  if(!save.ok)throw new Error('The alerts service did not store this device (HTTP '+save.status+').');
+  btn.textContent='Alerts on';set('This device will be notified when a new pick lands.');
+ }catch(e){btn.disabled=false;set(e&&e.message?e.message:'Alerts could not be turned on.');}}
+}
+pushInit();
+fromCache();refresh();setInterval(refresh,90000);setInterval(()=>{if(bets.length)today()},30000);clvLoad();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 <script>
 (function(){
-const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/',K='pt_fd_token';let comp='PL',busy=false,n24=true,focusId=0;
+const PX='https://pitchtipsx-fd-proxy.aroper53.workers.dev/v4/competitions/';let comp='PL',busy=false,n24=true,focusId=0;
 const el=id=>document.getElementById(id),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ukD=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:'Europe/London'}),ukT=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
 const relT=x=>{if(x.status==='IN_PLAY')return 'LIVE';if(x.status==='PAUSED')return 'HT';if(x.status==='FINISHED')return 'FT';const t=new Date(x.utcDate),hm=ukT(t),dd=Math.round((Date.parse(ukD(t))-Date.parse(ukD(Date.now())))/864e5),diff=t-Date.now();if(diff<0)return Math.max(1,Math.round(-diff/36e5))+'h ago';if(dd===0)return (+hm.slice(0,2)>=17?'Tonight ':'Today ')+hm;if(dd===1)return 'Tomorrow '+hm;if(dd<7)return t.toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short'})+' '+hm;return t.toLocaleDateString('en-GB',{timeZone:'Europe/London',day:'numeric',month:'short'})+' '+hm};
 const scr=x=>{const f=x.score&&x.score.fullTime;return f&&f.home!=null?' '+f.home+'-'+f.away:''};
-const tok=()=>{try{return localStorage.getItem(K)||''}catch(e){return ''}};
-function stat(){el('fdstat').textContent=tok()?'Token saved in this browser ✓':'No token saved.'}
-function goHow(){document.querySelector('nav button[data-t=how]').click();el('fdtok').focus()}
-function empty(msg,err){el('fxbody').innerHTML='<div class="fxempty empty'+(err?' fxerr':'')+'">'+msg+'<br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Picks first on t.me/pitchtipsx</a></div>'}
+function empty(msg,err){const list=n24&&window.ptxOdds&&ptxOdds.list?ptxOdds.list():'',euro=window.ptxOdds&&ptxOdds.euro?ptxOdds.euro():'';
+el('fxbody').innerHTML='<div class="fxempty empty'+(err?' fxerr':'')+'">'+msg+'<br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Picks first on t.me/pitchtipsx</a></div>'+(list||'')+(list?'':euro)}
 async function get(path,ttl=600000){const ck='ptx_fd_'+path;try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&Date.now()-c.t<ttl)return c.j}catch(e){}
- const r=await fetch(PX+path,{headers:{'X-Auth-Token':tok()}});
- if(r.status===429){const w=r.headers.get('X-RequestCounter-Reset');throw new Error('Rate limit hit (10 calls/min on the free tier). Try again in '+(w?w+'s':'a minute')+'.')}
- if(r.status===400||r.status===401||r.status===403)throw new Error('football-data.org rejected the token. Check it in <a href="#" data-gohow>How we bet</a>.');
- if(!r.ok)throw new Error('Couldn\'t load data (error '+r.status+'). Try again shortly.');const j=await r.json();try{localStorage.setItem(ck,JSON.stringify({t:Date.now(),j}))}catch(e){}return j}
+ const r=await fetch(PX+path);
+ if(r.status===429){const w=r.headers.get('X-RequestCounter-Reset');throw new Error('The fixture proxy is rate-limited. Try again in '+(w?w+'s':'a minute')+'.')}
+ if(r.status===401||r.status===403)throw new Error('The fixture proxy is not serving football-data without a personal token yet, so live scores are unavailable.');
+ if(!r.ok)throw new Error('Couldn\'t load fixtures (error '+r.status+').');const j=await r.json();try{localStorage.setItem(ck,JSON.stringify({t:Date.now(),j}))}catch(e){}return j}
 const norm=t=>String(t||'').toLowerCase().replace(/\b(fc|afc|cf|sc|the)\b/g,'').replace(/united/g,'utd').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 const nameOk=(team,side)=>{const a=norm(side);return [team?.shortName,team?.name,team?.tla].some(n=>{const b=norm(n);return b&&a&&(a===b||a.includes(b)||b.includes(a)||a.split(' ')[0]===b.split(' ')[0]&&a.split(' ')[0].length>3)})};
 const sides=r=>String(r.match||'').split(/\s+(?:vs?\.?|v)\s+/i);
@@ -438,19 +521,19 @@ const sameDay=(r,x)=>r.date===ukD(x.utcDate);
 const tipFor=x=>(window.ptxBets?window.ptxBets():[]).filter(r=>{const s=sides(r);return s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1])});
 const COMP=l=>/premier league/i.test(l)&&!/scottish|welsh|irish/i.test(l)?'PL':/championship/i.test(l)&&!/scottish|league one/i.test(l)?'ELC':/champions league|ucl/i.test(l)?'CL':'';
 window.fxOpen=(l,id)=>{focusId=id||0;const c=COMP(l||'');const b=c&&document.querySelector('.fx-sub button[data-c="'+c+'"]');if(b)b.click();else load()};
-window.fxLive=async function(){if(!tok())return;const pend=(window.ptxBets?window.ptxBets():[]).filter(r=>!['Won','Lost','Void'].includes(r.result)&&COMP(r.league||''));if(!pend.length)return;
+window.fxLive=async function(){const pend=(window.ptxBets?window.ptxBets():[]).filter(r=>!['Won','Lost','Void'].includes(r.result)&&COMP(r.league||''));if(!pend.length)return;
  const today=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
  for(const c of [...new Set(pend.map(r=>COMP(r.league)))]){try{const m=await get(c+'/matches?dateFrom='+today+'&dateTo='+today,60000);
   pend.filter(r=>COMP(r.league)===c).forEach(r=>{const s=sides(r);const x=(m.matches||[]).find(x=>s.length===2&&sameDay(r,x)&&nameOk(x.homeTeam,s[0])&&nameOk(x.awayTeam,s[1]));if(!x)return;
    const sc=x.score?.fullTime,lab={IN_PLAY:'LIVE',PAUSED:'HT',FINISHED:'FT',TIMED:'KO '+new Date(x.utcDate).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'}),SCHEDULED:'Scheduled',POSTPONED:'Postponed'}[x.status]||x.status;
    document.querySelectorAll('[data-sd="'+r._id+'"]').forEach(d=>d.classList.toggle('live',x.status==='IN_PLAY'||x.status==='PAUSED'));document.querySelectorAll('[data-lv="'+r._id+'"]').forEach(b=>{b.className='lv '+x.status;b.textContent=lab+(sc&&sc.home!=null?' '+sc.home+'-'+sc.away:'')})})}catch(e){}}};
-window.fxStrip=async function(){const box=el('fxstrip');if(!box)return;if(!tok()){box.innerHTML='';return}const now=Date.now(),out=[];
+window.fxStrip=async function(){const box=el('fxstrip');if(!box)return;const now=Date.now(),out=[];
  for(const c of ['PL','ELC','CL']){try{const m=await get(c+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000);(m.matches||[]).forEach(x=>{const t=new Date(x.utcDate)-now;if(t>-3*3600e3&&t<24*3600e3)out.push([c,x])})}catch(e){}}
  out.sort((a,b)=>a[1].utcDate.localeCompare(b[1].utcDate));
  box.innerHTML=out.length?'<span class="fxh">NEXT 24H</span>'+out.slice(0,12).map(([c,x])=>{const tp=tipFor(x);return '<a href="'+(tp.length?'#tip='+tp[0]._id:'#')+'" data-fxc="'+c+'">'+esc(x.homeTeam?.tla||x.homeTeam?.shortName)+' v '+esc(x.awayTeam?.tla||x.awayTeam?.shortName)+(tp.length?' <span class="tc" style="background:#c8ff00;color:#0a1628;border-radius:999px;padding:0 6px;font-size:10px;font-weight:900">TIP</span>':'')+'<small>'+esc(c)+' · '+esc(relT(x))+esc(/IN_PLAY|PAUSED/.test(x.status)?scr(x):'')+'</small></a>'}).join(''):'';
  box.querySelectorAll('a[data-fxc]').forEach(a=>{if(a.getAttribute('href')==='#')a.onclick=e=>{e.preventDefault();window.fxOpen(c2l(a.dataset.fxc))}})};
 const c2l=c=>({PL:'Premier League',ELC:'Championship',CL:'Champions League'})[c];
-let again=false;async function load(){if(busy){again=true;return}if(!tok()){if(window.ptxOdds&&ptxOdds.ready()&&n24){const L=ptxOdds.list();if(L){el('fxbody').innerHTML=L+'<div class="fxempty empty" style="margin-top:10px"><span class="note">Add a free football-data.org token for live scores and standings.</span><br><button class="btn" data-gohow>Add token in How we bet</button><br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Picks first on t.me/pitchtipsx</a></div>';return}}empty('<b>Add your free football-data.org token to see fixtures.</b><br><span class="note">It takes a minute and it\'s stored only on this device.</span><br><br><button class="btn" data-gohow>Add token in How we bet</button>');return}
+let again=false;async function load(){if(busy){again=true;return}
  busy=true;el('fxbody').innerHTML='<div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div>';
  try{const [m,s]=await Promise.all([get(comp+'/matches?status=SCHEDULED,TIMED,IN_PLAY,PAUSED',300000),get(comp+'/standings',1800000)]);
   const all=(m.matches||[]),now=Date.now(),ms=(n24?all.filter(x=>{const t=new Date(x.utcDate)-now;return t>-3*3600e3&&t<24*3600e3}):all).slice(0,20);let h='<h3>Upcoming matches</h3>',last='';
@@ -461,16 +544,14 @@ let again=false;async function load(){if(busy){again=true;return}if(!tok()){if(w
   const tb=((s.standings||[]).find(t=>t.type==='TOTAL')||{}).table||[];
   h+='<h3>Standings (top 10)</h3>';
   h+=tb.length?'<div class="scroll"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>'+tb.slice(0,10).map(r=>'<tr><td>'+r.position+'</td><td>'+esc(r.team?.shortName||r.team?.name)+'</td><td>'+r.playedGames+'</td><td>'+r.won+'</td><td>'+r.draw+'</td><td>'+r.lost+'</td><td>'+r.goalDifference+'</td><td><b>'+r.points+'</b></td></tr>').join('')+'</table></div>':'<p class="note">Standings not available.</p>';
+  h+=window.ptxOdds&&ptxOdds.euro?ptxOdds.euro():'';
   el('fxbody').innerHTML=h;if(focusId){const f=document.querySelector('.fxm[data-tips~="'+focusId+'"]');if(f){if(!again)focusId=0;f.scrollIntoView({behavior:'smooth',block:'center'});f.classList.add('flash');setTimeout(()=>f.classList.remove('flash'),2500)}}}
  catch(e){empty(e.message&&!/fetch/i.test(e.message)?e.message:'Network error. Check your connection and try again.',true)}finally{busy=false;if(again){again=false;load()}}}
-document.addEventListener('click',e=>{if(e.target.closest('[data-gohow]')){e.preventDefault();goHow()}});
 document.querySelectorAll('.fx-sub button[data-c]').forEach(b=>b.addEventListener('click',()=>{comp=b.dataset.c;document.querySelectorAll('.fx-sub button[data-c]').forEach(x=>x.classList.toggle('on',x===b));load()}));
 el('fxre').addEventListener('click',()=>{try{Object.keys(localStorage).filter(k=>k.startsWith('ptx_fd_'+comp+'/')).forEach(k=>localStorage.removeItem(k))}catch(e){}load()});
 el('fx24').addEventListener('click',()=>{n24=!n24;el('fx24').classList.toggle('on',n24);load()});
 document.querySelector('nav button[data-t=fix]').addEventListener('click',load);
-el('fdsave').addEventListener('click',()=>{const v=el('fdtok').value.trim();if(!v)return;try{localStorage.setItem(K,v)}catch(e){}el('fdtok').value='';stat()});
-el('fdclear').addEventListener('click',()=>{try{localStorage.removeItem(K)}catch(e){}stat()});
-stat();
+window.fxReload=()=>{if(!document.getElementById('fix').classList.contains('hide'))load()};
 setInterval(()=>window.fxLive&&window.fxLive(),120000);setTimeout(()=>window.fxStrip&&window.fxStrip(),1500);setInterval(()=>window.fxStrip&&window.fxStrip(),120000);
 })();
 </script>
