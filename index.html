@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
-<meta name="ptx-version" content="v12"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="ptx-version" content="v13"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -177,7 +177,7 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
 <div class="stats" id="stats"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div>
 <section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"><div class="sk" style="height:220px"></div></div><div id="chartinfo">Tap or hover the line for details.</div></section>
-<section class="excl" aria-label="X and Telegram records"><h2>X vs Telegram</h2><p class="note" style="margin:0 0 8px">Settled picks only. posted = y is X. posted = telegram is Telegram only.</p><div class="chans" id="excl"></div></section>
+<section class="excl" id="chansec" hidden aria-label="X and Telegram records"><h2>X vs Telegram</h2><p class="note" style="margin:0 0 8px">Settled picks only. posted = y is X. posted = telegram is Telegram only.</p><div class="chans" id="excl"></div></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
 <nav><button data-t="feed" class="on">Tips</button><button data-t="weeks">Weekly</button><button data-t="markets">Markets</button><button data-t="splits">Splits</button><button data-t="clv">CLV</button><button data-t="bank">Bankroll</button><button data-t="chal">Challenge</button><button data-t="cards">Cards</button><button data-t="fix">Fixtures</button><button data-t="how">How we bet</button></nav>
 <section id="feed"><div class="fbar" id="fbar"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
@@ -276,6 +276,7 @@ const koKey=r=>{const t=String(r.kickoff_uk||'').match(/(\d+):(\d+)(?::\d+)?\s*(
 const koShort=r=>koKey(r).slice(11);
 // TODO(Ted): change the member code here. Client-side only: the Google Sheet is public, so this is a soft gate, not security.
 const MEMBER_CODE='PITCH2026',MK='ptx_member';
+const SHOW_CHANNEL_SPLIT = false;
 const isMember=()=>{try{return localStorage.getItem(MK)===MEMBER_CODE}catch(e){return false}};
 const isExcl=r=>['telegram','email'].includes(String(r.posted||'').trim().toLowerCase());
 const postCh=r=>{const p=String(r.posted||'').trim().toLowerCase();return p==='y'?'x':p==='telegram'?'tg':''};
@@ -419,7 +420,8 @@ h+=(isMember()?rows:done).sort((a,b)=>koKey(a).localeCompare(koKey(b))).map(toda
 box.innerHTML=h}
 window.ptxToday=today;
 function chanTile(title,rows,cta){const a=agg(rows);return `<div class="chan"><h3>${esc(title)}</h3><div class="stats"><div class="stat"><small>Picks</small><b>${rows.length}</b></div><div class="stat"><small>W-L-V</small><b>${a.w}-${a.l}-${a.v}</b></div><div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div><div class="stat"><small>P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div></div>${cta||''}</div>`}
-function excl(){const s=bets.filter(settled),x=s.filter(r=>postCh(r)==='x'),tg=s.filter(r=>postCh(r)==='tg'),other=s.length-x.length-tg.length;
+function excl(){const sec=$('chansec');if(!SHOW_CHANNEL_SPLIT){if(sec)sec.hidden=true;if($('excl'))$('excl').innerHTML='';return}
+if(sec)sec.hidden=false;const s=bets.filter(settled),x=s.filter(r=>postCh(r)==='x'),tg=s.filter(r=>postCh(r)==='tg'),other=s.length-x.length-tg.length;
 $('excl').innerHTML=chanTile('X',x)+chanTile('Telegram only',tg,`<a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">t.me/pitchtipsx</a>`)+(other?`<p class="note" style="grid-column:1/-1;margin:0">${other} settled pick${other>1?'s':''} ${other>1?'were':'was'} not posted to X or Telegram, so ${other>1?'they are':'it is'} not in either tile.</p>`:'')}
 function splitTable(el,key,label){const g={};bets.filter(settled).forEach(r=>{const k=key(r)||'—';(g[k]??=[]).push(r)});
 el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
