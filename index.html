@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PitchTipsX · Member App</title>
 <meta name="description" content="PitchTipsX members app: live tracked record, every pick logged.">
-<meta name="ptx-version" content="v14"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="ptx-version" content="v15"><meta name="theme-color" content="#0a1628"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:title" content="PitchTipsX · live record"><meta property="og:description" content="Every pick logged, wins and losses. Picks first on Telegram. 18+ | GambleAware"><meta property="og:image" content="https://aroper53.github.io/pitchtipsx-record/og.png"><meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -129,6 +129,15 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 .hstrip>div{padding:10px 12px;border-left:1px solid var(--soft2);min-width:0}.hstrip>div:first-child{border-left:0;display:grid;place-items:center;padding:10px}
 .hstrip small{display:block;color:#8394ad;font-size:11px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hstrip b{display:block;font-size:22px;font-weight:900;letter-spacing:-.5px;font-variant-numeric:tabular-nums;white-space:nowrap}.hstrip .ed{font-size:13px;font-weight:700;color:#cfd8e6;letter-spacing:0}
 .hstrip .pt{width:40px;height:40px;border-radius:9px;background:#0a1628;color:#fff;font-weight:900;display:grid;place-items:center;border:1px solid var(--soft2);box-shadow:inset 0 -3px 0 #c8ff00}
+.record{margin:10px 0;background:#060c16;border:1px solid var(--soft2);border-radius:14px;padding:12px 14px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.reclead{margin:0 0 8px;color:#fff;font-size:18px;font-weight:800;line-height:1.35}
+.recblock{padding:8px 0 2px;border-top:1px solid var(--soft2)}
+.recblock h2{margin:0 0 4px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#8394ad;font-weight:700}
+.recnums,.recfig{margin:0;color:#fff;font-weight:800;font-variant-numeric:tabular-nums;font-size:16px}
+.recmeta{color:#8394ad;font-weight:600;font-size:14px}
+.recnote{margin:8px 0 4px;color:#8394ad;font-size:13px;line-height:1.4}
+.recrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin:0}
+.reclink{background:none;border:0;padding:0;color:#fff;font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer}
 @media(max-width:420px){.hstrip>div{padding:9px 8px}.hstrip b{font-size:18px}.hstrip .pt{width:32px;height:32px;font-size:14px}}
 .fbar{position:sticky;top:64px;z-index:4;background:rgba(10,22,40,.92);backdrop-filter:blur(8px);margin:0 -12px;padding:8px 12px 2px;border-bottom:1px solid transparent;transition:border-color .2s}.fbar.stuck{border-bottom-color:var(--soft2)}
 .skline{height:14px;margin:8px 0;border-radius:6px}
@@ -171,11 +180,15 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <p class="note">Every pick logged, wins and losses. Decimal odds, 1u = £5. Past results are no promise of future returns.</p></div>
 <section class="today" id="todaybox" aria-label="Today"><h2>Today</h2><div id="today"><p class="note" style="margin:0">Loading today's picks…</p></div></section>
 <section class="pushbox" id="pushbox" aria-label="New pick alerts"><h2>New-pick alerts</h2><p class="note" id="pushcopy" style="margin-top:0">Opt in and the app can notify you when a new pick lands. On iPhone and iPad, add PitchTipsX to your Home Screen first (Share, then Add to Home Screen) and open it from that icon. iOS only delivers web push to the Home Screen app.</p><button class="btn" id="pushbtn" type="button">Turn on alerts</button><p class="note" id="pushstat"></p></section>
-<section class="hstrip" aria-label="Headline numbers"><div><span class="pt">PT</span></div><div><small>Current P/L</small><b id="hpl"><span class="sk skline" style="display:block;height:20px"></span></b></div><div><small>Strike rate</small><b id="hsr"><span class="sk skline" style="display:block;height:20px"></span></b></div><div><small>Beat the close</small><b id="hbc"><span class="sk skline" style="display:block;height:20px"></span></b></div></section>
+<section class="record" id="record" aria-label="Record"><p class="reclead" id="beatline">Loading the record…</p>
+<article class="recblock"><h2>Since 21 Oct 2026 (new rules)</h2><p class="recrow"><span class="recnums" id="recnewnums"></span> <button type="button" class="reclink" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">How we bet</button></p></article>
+<article class="recblock"><h2>All time</h2><p class="recnums" id="recallnums"></p></article>
+<p class="recnote">Rules changed 21 Oct: flat 1u singles at 1.50–2.49, priced against Pinnacle fair.</p>
+<article class="recblock"><h2>Last 30 picks</h2><p class="recnums" id="recl30nums"></p></article>
+<article class="recblock"><h2>This month</h2><p class="recnums" id="recmonums"></p></article></section>
 <section class="clvh" id="clvhome"><h2>Beat the close: <em style="color:var(--mute)">early data</em></h2><div id="clvh"><div class="sk skline"></div><div class="sk skline" style="width:70%"></div></div></section>
 <section class="pin" aria-label="How we bet"><div class="ph"><h2>How we bet</h2><button class="lnk" style="background:none;border:0;color:var(--lime);font-weight:700;cursor:pointer" onclick="document.querySelector('nav button[data-t=how]').click();document.querySelector('nav').scrollIntoView({behavior:'smooth'})">Full rules →</button></div><div class="hw"><div><b>Flat 1u</b>1u = £5 on every pick</div><div><b>Decimal 1.50–2.49</b>Singles only</div><div><b>Fair price logged</b>Pinnacle no-vig, plus the close</div><div><b>18+ | GambleAware</b><a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a></div></div><p class="note ruleline"><b style="color:#fff">Fun accas</b> are just for fun, posted with no stake, and not tracked. <b style="color:#fff">Bet builders</b> with a real priced reason are staked and logged on the record like any other pick.</p></section>
 <div class="live" id="live"><span class="dot"></span><span id="livetxt">Connecting…</span></div>
-<div class="stats" id="stats"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div>
 <section class="panel" id="chartbox"><h2>Profit over time (units, settled picks)</h2><div id="chart"><div class="sk" style="height:220px"></div></div><div id="chartinfo">Tap or hover the line for details.</div></section>
 <section class="excl" id="chansec" hidden aria-label="X and Telegram records"><h2>X vs Telegram</h2><p class="note" style="margin:0 0 8px">Settled picks only. posted = y is X. posted = telegram is Telegram only.</p><div class="chans" id="excl"></div></section>
 <section class="next"><h2>Next up / Pending</h2><div id="next"></div></section>
@@ -183,7 +196,7 @@ nav button.on,.fx-sub button.on{background:#fff;color:#0a1628;border-color:#fff}
 <section id="feed"><div class="fbar" id="fbar"><input class="search" id="q" type="search" placeholder="Search team, market or selection…">
 <div class="presets" id="presets"><button class="preset" data-p="cards">Cards only</button><button class="preset" data-p="corners">Corners only</button><button class="preset" data-p="week">This week</button><button class="preset" data-p="pending">Pending</button><button class="preset" data-p="won">Winners</button><button class="preset" data-p="">Clear</button></div>
 <div class="filters"><select id="fl"></select><select id="fm"></select><select id="fr"></select><select id="fs"></select></div>
-</div><div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><p class="note" id="beatline" hidden style="margin:0 0 8px"></p><div id="fxstrip" aria-label="Next 24h fixtures"></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
+</div><div class="bar"><span class="meta" id="count"></span><button class="btn" onclick="exportCsv()">Export CSV</button></div><div id="fxstrip" aria-label="Next 24h fixtures"></div><div id="tips"><div class="sk sktip"></div><div class="sk sktip"></div><div class="sk sktip"></div></div></section>
 <section id="weeks" class="hide"><div class="scroll"><table id="wt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div></section>
 <section id="markets" class="hide"><p class="note">Settled picks by market category. Strike rate = wins ÷ (wins + losses); voids excluded.</p><div id="mk"><div class="sk skstat"></div><div class="sk skstat"></div><div class="sk skstat"></div></div><p class="note" id="mkother"></p></section>
 <section id="splits" class="hide"><h3>By league</h3><div class="scroll"><table id="lt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div><h3>By month</h3><div class="scroll"><table id="mt"><tr><td><div class="sk skline"></div><div class="sk skline"></div><div class="sk skline"></div></td></tr></table></div><p class="note">Settled picks only. Strike excludes voids; ROI = P/L ÷ total staked.</p></section>
@@ -254,6 +267,7 @@ fetch('odds.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}
  const fx=document.getElementById('fix');if(fx&&!fx.classList.contains('hide')&&window.fxReload)window.fxReload()}).catch(()=>{});
 })();
 </script>
+<script src="record.js"></script>
 <script>
 const ID='1nDay5elWFLF9GrzxfSGLpzpmSLSMx4FI38IFklZJvYs',UNIT=5,BASE=location.origin+location.pathname.replace(/[^/]*$/,'');
 const $=id=>document.getElementById(id);
@@ -294,14 +308,7 @@ const named=rest.match(/^\s+([A-Za-z0-9][\w.&'+-]*(?:\s+[A-Za-z0-9][\w.&'+-]*){0
 if(named&&!/^(supplied|at|on|only|tbc)$/i.test(named[1]))book=named[1].trim();
 else{const paren=rest.match(/^\s*\(([^)]+)\)/);if(paren&&!/supplied|tipster|real close|estimate|indicative|tbc|n\/a/i.test(paren[1]))book=paren[1].trim()}
 return{closing,book}}
-function closeInfo(r){const row=(typeof trueCloses==='function'?trueCloses(CLVJ):[]).find(x=>clvHit(x,r));
-let closing=NaN,book='';
-if(row){closing=+row.closing;book=String(row.books||'').trim()}
-else{const n=closeFromNote(r&&r.notes);if(n){closing=n.closing;book=n.book}}
-if(!(closing>1)){if(/\bClos(?:ed|ing price)\s+TBC\b/i.test(String(r&&r.notes||'')))return{tbc:true};return null}
-let took=decOdds(r.odds);if(!isFinite(took)&&row&&+row.posted>1)took=+row.posted;
-const beat=isFinite(took)?(took>closing+1e-9?1:took<closing-1e-9?-1:0):null;
-return{took:isFinite(took)?took:null,tookRaw:r.odds,closing,book,beat}}
+function closeInfo(r){return ptxRecord.closeInfo(r,CLVJ)}
 function closeText(info){if(!info)return'';if(info.tbc)return'Close TBC';const took=info.took!=null?info.took.toFixed(2):String(info.tookRaw||'');const book=info.book?` (${info.book})`:'';
 const how=info.beat==null?'':info.beat>0?' · Beat the close':info.beat<0?' · Didn\'t beat the close':' · Level with the close';
 return`Took ${took} · Closed ${info.closing.toFixed(2)}${book}${how}`}
@@ -309,31 +316,31 @@ function closeLine(r){const info=closeInfo(r);if(!info)return'';if(info.tbc)retu
 const took=info.took!=null?info.took.toFixed(2):esc(info.tookRaw||'');const book=info.book?` (${esc(info.book)})`:'';
 const how=info.beat==null?'':info.beat>0?' · <b class="pos">Beat the close</b>':info.beat<0?' · <b class="neg">Didn\'t beat the close</b>':' · Level with the close';
 return`<div class="clvl">Took ${took} · Closed ${info.closing.toFixed(2)}${book}${how}</div>`}
-function beatSummary(){const rec=(bets||[]).map(closeInfo).filter(x=>x&&!x.tbc);const y=rec.length,x=rec.filter(i=>i.beat>0).length;return y?`Beat the close on ${x} of ${y} recorded pick${y===1?'':'s'}`:''}
+function beatSummary(){return ptxRecord.beatLine(bets,CLVJ)}
 let bets=[],allRows=[],view=[],TIMG={},hiddenPending=0,SPK={},wkOnly=false,pendOnly=false,trackerReady=false;
 const xid=r=>{const m=xlink(r).match(/status\/(\d+)/);return m?m[1]:''};
 const tipImg=r=>{const u=TIMG[xid(r)];return u?`<a class="timg" href="${xlink(r)}" target="_blank" rel="noopener" aria-label="Open the original X post"><img src="${esc(u)}?name=small" loading="lazy" alt="Tip graphic for ${esc(r.selection)}" onerror="this.parentNode.remove()"></a>`:tgfx(r)};
 const tgfx=r=>{const lk=xlink(r),inner=`<span class="tgk">${esc(slipType(r))} · ${esc(r.market)}</span><span class="tgs">${esc(r.selection)}</span><span class="tgu"></span><span class="tgo">${esc(r.odds)}</span><span class="tgl">Decimal odds · @PitchTipsX · 18+ | GambleAware</span>`;return lk?`<a class="tgfx" href="${lk}" target="_blank" rel="noopener" aria-label="Open the X post">${inner}</a>`:`<div class="tgfx">${inner}</div>`};
 fetch('tipimg.json').then(r=>r.json()).then(j=>{TIMG=j;if(bets.length){feed();next()}}).catch(()=>{});
 function agg(rows){let w=0,l=0,v=0,st=0,pl=0;rows.forEach(r=>{if(!settled(r))return;const s=money(r.stake)||0,p=money(r.profit_loss)||0;if(r.result==='Won')w++;else if(r.result==='Lost')l++;else v++;st+=s;pl+=p});return{w,l,v,st,pl,strike:w+l?w/(w+l)*100:0,roi:st?pl/st*100:0}}
-function stats(){const a=agg(bets);$('hpl').innerHTML=`<span class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</span>`;$('hsr').textContent=a.strike.toFixed(1)+'%';$('stats').innerHTML=`
-<div class="stat"><small>Record W-L-P</small><b>${a.w}-${a.l}-${a.v}</b></div>
-<div class="stat"><small>Profit/Loss</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b><small>${a.pl<0?'−':''}£${Math.abs(a.pl).toFixed(2)}</small></div>
-<div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div>
-<div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div>`}
+function paintRecord(){if(!trackerReady)return;const s=ptxRecord.slices(bets,ukToday().slice(0,7));
+$('recnewnums').innerHTML=ptxRecord.line(s.since);$('recallnums').innerHTML=ptxRecord.line(s.all);
+$('recl30nums').innerHTML=ptxRecord.line(s.last30);$('recmonums').innerHTML=ptxRecord.line(s.month);
+const bl=$('beatline');if(bl)bl.textContent=beatSummary()}
+function stats(){paintRecord()}
 function opts(id,fn,label){const el=$(id),cur=el.value;const vals=[...new Set(bets.map(fn).filter(Boolean))].sort();el.innerHTML=`<option value="">All ${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');el.onchange=feed}
 function spkBuild(){SPK={};let cum=0;const pts=[];bets.filter(settled).slice().sort((a,b)=>koKey(a).localeCompare(koKey(b))||a._id-b._id).forEach(r=>{cum+=(money(r.profit_loss)||0)/UNIT;pts.push(cum);SPK[r._id]=pts.slice(-12)})}
 function spark(v,w=64,h=18){if(!v||v.length<2)return'';const mn=Math.min(...v,0),mx=Math.max(...v,0),rg=mx-mn||1;const X=i=>(i/(v.length-1)*(w-2)+1).toFixed(1),Y=x=>(h-1-(x-mn)/rg*(h-2)).toFixed(1);const last=v[v.length-1];
-return `<svg class="spk" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="Running P/L to this pick"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2b3f60" stroke-width="1"/><polyline fill="none" stroke="${last>=0?'#c8ff00':'#ff6b6b'}" stroke-width="1.6" points="${v.map((x,i)=>X(i)+','+Y(x)).join(' ')}"/></svg>`}
+return `<svg class="spk" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="Running P/L to this pick"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2b3f60" stroke-width="1"/><polyline fill="none" stroke="${last>=0?'#c8ff00':'#cfd8e6'}" stroke-width="1.6" points="${v.map((x,i)=>X(i)+','+Y(x)).join(' ')}"/></svg>`}
 function card(r,i){const res=resOf(r),p=money(r.profit_loss),bk=book(r),lk=xlink(r);
 return `<div class="tip ${res==='Pending'?'pending':res}${isExcl(r)?' excl':''}" data-id="${r._id}"><div class="row"><span class="slip">${slipType(r)} · ${esc(r.market)}${isExcl(r)?'<span class="mo">🔒 MEMBERS ONLY</span>':''}</span><span>${sdot(r)}<span class="chip ${res}">${res}</span><span class="lv hide" data-lv="${r._id}"></span></span></div>
 <div class="row"><div class="sel">${esc(r.selection)}</div><div class="odds">${esc(r.odds)}<small>DECIMAL</small></div></div>
 ${tipImg(r)}<div class="meta">${esc(r.match)}</div><div class="meta">${esc(r.league)} · <span class="rel">${rel(r)}</span>${bk?' · '+esc(bk):''}</div>
-${res==='Pending'&&window.ptxOdds?ptxOdds.tip(r):''}${closeLine(r)}<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span class="${cls(p)}">${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}${res!=='Pending'&&/premier league|championship|champions league|ucl/i.test(r.league||'')&&!/scottish|welsh|irish|league one/i.test(r.league||'')?`<button class="share" onclick="seeFix(${r._id})">Fixture</button>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
+${res==='Pending'&&window.ptxOdds?ptxOdds.tip(r):''}${closeLine(r)}<div class="row meta" style="margin-top:4px"><span>Stake ${esc(r.stake)}${isNaN(p)||res==='Pending'?'':` · <span>${fmt(p/UNIT)}u</span>${spark(SPK[r._id])}`}</span><span>${lk?`<a href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}${res!=='Pending'&&/premier league|championship|champions league|ucl/i.test(r.league||'')&&!/scottish|welsh|irish|league one/i.test(r.league||'')?`<button class="share" onclick="seeFix(${r._id})">Fixture</button>`:''}<button class="share" onclick="share(${r._id})">Share ↗</button></span></div>${res==='Pending'?`<div class="qas">${lk?`<a class="qa" href="${lk}" target="_blank" rel="noopener">View on X</a>`:''}<button class="qa" onclick="seeFix(${r._id})">See fixture</button></div>`:''}</div>`}
 function seeFix(id){const r=bets.find(x=>x._id===id);document.querySelector('nav button[data-t=fix]').click();window.fxOpen&&window.fxOpen(r?r.league:'',id);document.querySelector('nav').scrollIntoView({behavior:'smooth'})}
 function feed(){const q=$('q').value.trim().toLowerCase(),L=$('fl').value,M=$('fm').value,R=$('fr').value,S=$('fs').value;
 const wk=monday(new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'}));view=bets.filter(r=>(!wkOnly||r.date>=wk)&&(!pendOnly||!settled(r))&&(!L||r.league===L)&&(!M||cat(r)===M.split(' ')[0])&&(!R||resOf(r)===R)&&(!S||slipType(r)===S)&&(!q||[r.selection,r.match,r.market].join(' ').toLowerCase().includes(q)));
-$('count').textContent=`${view.length} of ${bets.length} picks`;const bl=$('beatline');if(bl){const bt=beatSummary();bl.hidden=!bt;bl.textContent=bt}
+$('count').textContent=`${view.length} of ${bets.length} picks`;paintRecord()
 const T=$('tips');T.classList.remove('fade');void T.offsetWidth;T.classList.add('fade');T.innerHTML=view.map(r=>card(r,bets.indexOf(r))).join('')||(pendOnly?'<div class="empty"><b>No pending picks right now.</b><br><span class="note">New picks land on Telegram first.</span><br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join t.me/pitchtipsx</a></div>':!isMember()&&R==='Pending'?'<div class="gate">Pending picks are for <b>members</b>. <button class="btn" onclick="memberOpen()">Unlock</button></div>':'<div class="empty"><b>No picks match these filters.</b><br><span class="note">New picks land on Telegram first.</span><br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join t.me/pitchtipsx</a></div>')}
 function preset(p){['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';wkOnly=false;pendOnly=false;
 const setSel=(id,v)=>{const o=[...$(id).options].find(o=>o.value===v||o.textContent===v);if(o)$(id).value=o.value};
@@ -348,10 +355,10 @@ const p=bets.filter(r=>!settled(r)).sort((a,b)=>koKey(a).localeCompare(koKey(b))
 $('next').innerHTML=p.length?p.map(r=>card(r,bets.indexOf(r))).join(''):'<div class="empty"><b>No pending picks right now.</b><br><span class="note">New picks land on Telegram first.</span><br><a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">Join t.me/pitchtipsx</a></div>'}
 function monday(d){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(0,10)}
 function weeks(){const g={};bets.forEach(r=>{if(/^\d{4}-\d{2}-\d{2}$/.test(r.date))(g[monday(r.date)]??=[]).push(r)});
-$('wt').innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+$('wt').innerHTML='<tr><th>Week (Mon)</th><th>W-L-P</th><th>P/L</th><th>ROI</th></tr>'+Object.keys(g).sort().reverse().map(k=>{const a=agg(g[k]);return `<tr><td>${k}</td><td>${a.w}-${a.l}-${a.v}</td><td>${fmt(a.pl/UNIT)}u (£${a.pl.toFixed(2)})</td><td>${fmt(a.roi,1)}%</td></tr>`}).join('')}
 function markets(){const s=bets.filter(settled);let h='';const mxu=Math.max(1,...[...CATS,'Other'].map(c=>Math.abs(agg(s.filter(r=>cat(r)===c)).pl/UNIT)));[...CATS,'Other'].forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(c==='Other'&&!rows.length)return;const a=agg(rows);
-h+=`<div class="mk${a.pl<0?' negm':''}"><div class="row"><b>${c==='Other'?'Accas / builders':c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="kp"><div><small>Strike</small><b>${a.strike.toFixed(0)}%</b></div><div><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,0)}%</b></div><div><small>n</small><b>${rows.length}</b></div></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%;background:${a.strike>=50?'var(--lime)':'var(--coral)'}"></div></div>
-<div class="row meta"><span>Strike <b style="color:#fff">${a.strike.toFixed(1)}%</b></span><span class="${cls(a.pl)}"><b>${fmt(a.pl/UNIT)}u</b> (${gbp(a.pl)})</span></div><div class="pl" title="P/L in units"><span class="meta" style="width:30px">P/L</span><div class="half"><span class="zl"></span><i style="${a.pl>=0?'left:50%':'right:50%'};width:${(Math.min(Math.abs(a.pl/UNIT)/mxu,1)*50).toFixed(1)}%;background:${a.pl>=0?'var(--lime)':'var(--coral)'}"></i></div><span class="meta" style="width:46px;text-align:right">ROI ${fmt(a.roi,0)}%</span></div></div>`});
+h+=`<div class="mk"><div class="row"><b>${c==='Other'?'Accas / builders':c}</b><span class="meta">${a.w}-${a.l}${a.v?'-'+a.v:''} · ${rows.length} settled</span></div><div class="kp"><div><small>Strike</small><b>${a.strike.toFixed(0)}%</b></div><div><small>ROI</small><b>${fmt(a.roi,0)}%</b></div><div><small>n</small><b>${rows.length}</b></div></div><div class="track"><div class="fill" style="width:${a.strike.toFixed(1)}%;background:${a.strike>=50?'var(--lime)':'#9fb0c8'}"></div></div>
+<div class="row meta"><span>Strike <b style="color:#fff">${a.strike.toFixed(1)}%</b></span><span><b>${fmt(a.pl/UNIT)}u</b> (${gbp(a.pl)})</span></div><div class="pl" title="P/L in units"><span class="meta" style="width:30px">P/L</span><div class="half"><span class="zl"></span><i style="${a.pl>=0?'left:50%':'right:50%'};width:${(Math.min(Math.abs(a.pl/UNIT)/mxu,1)*50).toFixed(1)}%;background:${a.pl>=0?'var(--lime)':'#9fb0c8'}"></i></div><span class="meta" style="width:46px;text-align:right">ROI ${fmt(a.roi,0)}%</span></div></div>`});
 $('mk').innerHTML=h;const o=s.filter(r=>cat(r)==='Other');$('mkother').textContent=o.length?`Other = ${o.length} settled picks whose market doesn't map to one category (${[...new Set(o.map(r=>r.market))].join(', ')}).`:''}
 function table(el,rows,skip=[]){if(!rows.length){el.innerHTML='<tr><td>No data yet.</td></tr>';return}const cols=Object.keys(rows[0]).filter(c=>c&&!skip.includes(c)&&rows.some(r=>r[c]));
 el.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>{let v=esc(r[c]);if(/^https?:\/\//.test(r[c]||''))v=`<a href="${v}" target="_blank" rel="noopener">link</a>`;return `<td>${v}</td>`}).join('')+'</tr>').join('')}
@@ -404,16 +411,16 @@ const dl=i=>{const t=pts[i].r.date||'';return /^\d{4}-\d{2}-\d{2}$/.test(t)?new 
 const ticks=mob?[0,pts.length-1]:[0,Math.floor((pts.length-1)/2),pts.length-1];
 box.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative profit in units"><defs><clipPath id="cpu"><rect x="0" y="0" width="${W}" height="${z}"/></clipPath><clipPath id="cpd"><rect x="0" y="${z}" width="${W}" height="${H}"/></clipPath></defs>${grid}
 <path d="${d} L${X(pts.length-1)} ${z} L${X(0)} ${z} Z" fill="rgba(200,255,0,.14)" clip-path="url(#cpu)" class="${chart.drawn?'':'areaf'}"/><path d="${d} L${X(pts.length-1)} ${z} L${X(0)} ${z} Z" fill="rgba(255,107,107,.16)" clip-path="url(#cpd)" class="${chart.drawn?'':'areaf'}"/>
-<path class="${chart.drawn?'':'draw'}" d="${d}" fill="none" stroke="#c8ff00" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpu)"/><path class="${chart.drawn?'':'draw'}" d="${d}" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpd)"/>
+<path class="${chart.drawn?'':'draw'}" d="${d}" fill="none" stroke="#c8ff00" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpu)"/><path class="${chart.drawn?'':'draw'}" d="${d}" fill="none" stroke="#cfd8e6" stroke-width="2.5" stroke-linejoin="round" clip-path="url(#cpd)"/>
 ${[...new Set(ticks)].map((i,k,arr)=>`<text x="${X(i)}" y="${H-8}" fill="#9fb0c8" font-size="${fs}" text-anchor="${k===0?'start':k===arr.length-1?'end':'middle'}">${esc(dl(i))}</text>`).join('')}
 <line id="cx" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#fff" stroke-opacity=".35" class="hide"/><circle id="cd" r="6" fill="#fff" class="hide"/>
-<circle cx="${X(pts.length-1)}" cy="${Y(last)}" r="5" fill="${last>=0?'#c8ff00':'#ff6b6b'}"/><rect x="${PL}" y="0" width="${W-PL-PR}" height="${H}" fill="transparent" id="chit"/></svg>`;
+<circle cx="${X(pts.length-1)}" cy="${Y(last)}" r="5" fill="${last>=0?'#c8ff00':'#cfd8e6'}"/><rect x="${PL}" y="0" width="${W-PL-PR}" height="${H}" fill="transparent" id="chit"/></svg>`;
 box.querySelectorAll('.draw').forEach(p=>{try{p.style.setProperty('--len',Math.ceil(p.getTotalLength()))}catch(e){}});chart.drawn=true;const sv=box.querySelector('svg'),cx=sv.querySelector('#cx'),cd=sv.querySelector('#cd');
 const pick=e=>{const rc=sv.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-rc.left;let i=pts.length<2?0:Math.round((x-PL)/(W-PL-PR)*(pts.length-1));i=Math.max(0,Math.min(pts.length-1,i));const p=pts[i];
 cx.setAttribute('x1',X(i));cx.setAttribute('x2',X(i));cx.classList.remove('hide');cd.setAttribute('cx',X(i));cd.setAttribute('cy',Y(p.u));cd.classList.remove('hide');
-const pp=money(p.r.profit_loss)||0;info.innerHTML=`${esc(p.r.date)} · ${esc(p.r.selection)} (${esc(resOf(p.r))}, <span class="${cls(pp)}">${fmt(pp/UNIT)}u</span>) → total <b class="${cls(p.u)}">${fmt(p.u)}u</b> (${gbp(p.u*UNIT)})`};
+const pp=money(p.r.profit_loss)||0;info.innerHTML=`${esc(p.r.date)} · ${esc(p.r.selection)} (${esc(resOf(p.r))}, ${fmt(pp/UNIT)}u) → total <b>${fmt(p.u)}u</b> (${gbp(p.u*UNIT)})`};
 sv.addEventListener('pointermove',pick);sv.addEventListener('pointerdown',pick);sv.addEventListener('touchmove',pick,{passive:true});
-info.innerHTML=`Now: <b class="${cls(last)}">${fmt(last)}u</b> (${gbp(last*UNIT)}) over ${pts.length} settled picks. Tap or drag on the chart for details.`}
+info.innerHTML=`Now: <b>${fmt(last)}u</b> (${gbp(last*UNIT)}) over ${pts.length} settled picks. Tap or drag on the chart for details.`}
 let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(bets.length)chart()},150)});
 function xiBadge(r){const n=String(r.notes||'')+' '+String(r.why||'');
 if(/\b(not in (the )?(matchday )?squad|ruled out|left out of)\b/i.test(n))return 'Out';
@@ -441,18 +448,18 @@ if(!isMember()&&pend.length)h+=`<div class="gate" style="margin-bottom:8px"><b>$
 h+=(isMember()?rows:done).sort((a,b)=>koKey(a).localeCompare(koKey(b))).map(todayCard).join('');
 box.innerHTML=h}
 window.ptxToday=today;
-function chanTile(title,rows,cta){const a=agg(rows);return `<div class="chan"><h3>${esc(title)}</h3><div class="stats"><div class="stat"><small>Picks</small><b>${rows.length}</b></div><div class="stat"><small>W-L-V</small><b>${a.w}-${a.l}-${a.v}</b></div><div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div><div class="stat"><small>P/L</small><b class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</b></div><div class="stat"><small>ROI</small><b class="${cls(a.roi)}">${fmt(a.roi,1)}%</b></div></div>${cta||''}</div>`}
+function chanTile(title,rows,cta){const a=agg(rows);return `<div class="chan"><h3>${esc(title)}</h3><div class="stats"><div class="stat"><small>Picks</small><b>${rows.length}</b></div><div class="stat"><small>W-L-V</small><b>${a.w}-${a.l}-${a.v}</b></div><div class="stat"><small>Strike rate</small><b>${a.strike.toFixed(1)}%</b></div><div class="stat"><small>P/L</small><b>${fmt(a.pl/UNIT)}u</b></div><div class="stat"><small>ROI</small><b>${fmt(a.roi,1)}%</b></div></div>${cta||''}</div>`}
 function excl(){const sec=$('chansec');if(!SHOW_CHANNEL_SPLIT){if(sec)sec.hidden=true;if($('excl'))$('excl').innerHTML='';return}
 if(sec)sec.hidden=false;const s=bets.filter(settled),x=s.filter(r=>postCh(r)==='x'),tg=s.filter(r=>postCh(r)==='tg'),other=s.length-x.length-tg.length;
 $('excl').innerHTML=chanTile('X',x)+chanTile('Telegram only',tg,`<a class="cta" href="https://t.me/pitchtipsx" target="_blank" rel="noopener">t.me/pitchtipsx</a>`)+(other?`<p class="note" style="grid-column:1/-1;margin:0">${other} settled pick${other>1?'s':''} ${other>1?'were':'was'} not posted to X or Telegram, so ${other>1?'they are':'it is'} not in either tile.</p>`:'')}
 function splitTable(el,key,label){const g={};bets.filter(settled).forEach(r=>{const k=key(r)||'—';(g[k]??=[]).push(r)});
-el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td class="${cls(a.pl)}">${fmt(a.pl/UNIT)}u</td><td class="${cls(a.roi)}">${fmt(a.roi,1)}%</td></tr>`}).join('')}
+el.innerHTML=`<tr><th>${label}</th><th>W-L-P</th><th>Strike</th><th>P/L</th><th>ROI</th></tr>`+Object.keys(g).sort((x,y)=>label==='Month'?y.localeCompare(x):g[y].length-g[x].length||x.localeCompare(y)).map(k=>{const a=agg(g[k]);return `<tr><td>${esc(k)}</td><td>${a.w}-${a.l}-${a.v}</td><td>${a.strike.toFixed(1)}%</td><td>${fmt(a.pl/UNIT)}u</td><td>${fmt(a.roi,1)}%</td></tr>`}).join('')}
 function splits(){splitTable($('lt'),r=>r.league,'League');splitTable($('mt'),r=>/^\d{4}-\d{2}/.test(r.date)?new Date(r.date.slice(0,7)+'-15').toLocaleDateString('en-GB',{month:'short',year:'numeric'})+' ('+r.date.slice(0,7)+')':'',  'Month')}
 let CLVJ=null;
 const clvNorm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
 function trueCloses(j){return ((j&&j.rows)||[]).filter(r=>r&&r.approximate!==true&&isFinite(+r.posted)&&isFinite(+r.closing)&&+r.posted>1&&+r.closing>1).map(r=>({...r,clv_pct:(+r.posted/+r.closing-1)*100}))}
 function clvHit(row,bet){if(clvNorm(row.selection)!==clvNorm(bet.selection))return false;if(row.match&&bet.match){const a=clvNorm(row.match),b=clvNorm(bet.match);if(a!==b&&!a.includes(b)&&!b.includes(a))return false}else if((row.match||bet.match)&&!(row.match&&bet.match))return false;const bd=String(bet.date||''),rd=String(row.date||'');if(bd&&rd&&bd!==rd)return false;return true}
-async function clvLoad(){try{CLVJ=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});clvHome(CLVJ)}catch(e){$('clvbody').innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>';$('hbc').innerHTML='<span class="ed">Unavailable</span>'}}
+async function clvLoad(){try{CLVJ=await fetch('clv.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()});clvHome(CLVJ)}catch(e){$('clvbody').innerHTML='<p class="note">CLV data isn\'t available right now.</p>';$('clvh').innerHTML='<p class="note" style="margin:0">Closing-price data isn\'t available right now.</p>';paintRecord()}}
 function clvHome(j){const rows=trueCloses(j),sett=bets.filter(settled),matched=sett.filter(b=>rows.some(r=>clvHit(r,b)));
 CLVM={};matched.forEach(b=>{const r=rows.find(x=>clvHit(x,b));CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()]=r});
 const n=matched.length,N=sett.length,avg=n?matched.reduce((s,b)=>s+(+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()].clv_pct),0)/n:null;
@@ -460,10 +467,9 @@ const beat=n?matched.filter(b=>+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowe
 const cover=N?`based on ${n} of ${N} picks with a recorded close`:(n?`${n} recorded close${n>1?'s':''}. Waiting for the record to count settled picks.`:'No settled picks loaded yet.');
 const go='<button class="lnk" onclick="document.querySelector(\'nav button[data-t=clv]\').click();document.querySelector(\'nav\').scrollIntoView({behavior:\'smooth\'})">See the CLV breakdown →</button>';
 if(n&&avg!=null){const w=Math.min(Math.abs(avg)/10,1)*50,ord=matched.slice().sort((a,b)=>koKey(a).localeCompare(koKey(b)));let acc=0;const run=ord.map((b,i)=>(acc+=+CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()].clv_pct)/(i+1));
-$('hbc').innerHTML=`<span class="${cls(avg)}">${fmt(avg,1)}%</span><small>${n} of ${N}</small>`;
 $('clvhome').querySelector('h2').innerHTML=`Beat the close: <em class="${cls(avg)}">${fmt(avg,1)}%</em> ${spark(run,90,24)}`;
 $('clvh').innerHTML=`<div class="big"><div><b class="${cls(avg)}">${fmt(avg,1)}%</b><div class="meta">average CLV</div></div><div class="gauge"><div class="gtrack"><span class="gf" style="${avg>=0?'left:50%':'right:50%'};width:${w.toFixed(1)}%;background:${avg>=0?'var(--lime)':'var(--coral)'}"></span><span class="gz"></span></div><div class="glab"><span>−10%</span><span>0</span><span>+10%</span></div></div></div><p class="note" style="margin:8px 0 0">${cover}. Beat the close ${beat.toFixed(0)}%.</p>`+go}
-else{$('hbc').innerHTML=`<span class="ed">No close</span><small>${n} of ${N||0}</small>`;$('clvhome').querySelector('h2').innerHTML='Beat the close: <em>no recorded closes</em>';
+else{$('clvhome').querySelector('h2').innerHTML='Beat the close: <em>no recorded closes</em>';
 $('clvh').innerHTML=`<div class="big"><div><b>0</b><div class="meta">recorded closes</div></div><div style="flex:1;min-width:180px"><span class="note" style="margin:0">${cover}. Bets with no recorded closing price are left out. Nothing is estimated.</span></div></div>`+go}
 const lines=matched.slice().sort((a,b)=>koKey(b).localeCompare(koKey(a))).map(b=>{const r=CLVM[((b.date||'')+'|'+(b.selection||'')).toLowerCase()];return `<tr><td>${esc(b.date)}</td><td>${esc(b.selection)}<div class="meta">${esc(b.match)}</div></td><td>${(+r.posted).toFixed(2)}</td><td>${(+r.closing).toFixed(2)}</td><td class="${cls(r.clv_pct)}">${fmt(+r.clv_pct,1)}%</td></tr>`}).join('');
 const skipped=(j&&j.approximate&&+j.approximate.n)||((j&&j.rows)||[]).filter(r=>r&&r.approximate===true).length;
@@ -476,19 +482,20 @@ const now=new Date(),ym=d=>d.toISOString().slice(0,7),thisM=ym(now),prev=new Dat
 const mname=k=>new Date(k+'-15').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 const specs=[];[[thisM,'This month'],[lastM,'Last month']].forEach(([k,lab])=>{const rows=mk(k);if(rows.length)specs.push({name:lab+' · '+mname(k),rows,file:'month-'+k})});
 CATS.forEach(c=>{const rows=s.filter(r=>cat(r)===c);if(rows.length)specs.push({name:c+' · all time',rows,file:'market-'+c.toLowerCase()})});
-const out=[];for(const sp of specs){const a=agg(sp.rows);const blob=await drawCard({kicker:'Record summary',title:sp.name,big:`${fmt(a.pl/UNIT)}u`,bigColor:a.pl>=0?'#c8ff00':'#ff6b6b',bigLabel:`profit/loss · ${gbp(a.pl)} at 1u = £5`,lines:[`Record ${a.w}-${a.l}-${a.v}`,`Strike ${a.strike.toFixed(1)}% · ROI ${fmt(a.roi,1)}%`,`${sp.rows.length} settled picks, losses included`]});
+const out=[];for(const sp of specs){const a=agg(sp.rows);const blob=await drawCard({kicker:'Record summary',title:sp.name,big:ptxRecord.unitsPlain(a.pl),bigColor:'#fff',bigLabel:`profit/loss · ${gbp(a.pl)} at 1u = £5`,lines:[`Record ${a.w}-${a.l}-${a.v}`,`Strike ${a.strike.toFixed(1)}% · ROI ${ptxRecord.roiPlain(a.roi)}`,`${sp.rows.length} settled picks, losses included`]});
 out.push({sp,a,blob,url:URL.createObjectURL(blob)})}
 sumBlobs.forEach(x=>URL.revokeObjectURL(x.url));sumBlobs=out;
 el.innerHTML=out.length?out.map((x,i)=>`<figure><img src="${x.url}" alt="${esc(x.sp.name)} summary card"><figcaption><span class="meta">${esc(x.sp.name)}</span><button class="share" data-sum="${i}">Share ↗</button></figcaption></figure>`).join(''):'<p class="note">No settled picks yet.</p>';
-el.querySelectorAll('[data-sum]').forEach(b=>b.onclick=()=>{const x=sumBlobs[+b.dataset.sum];doShare('PitchTipsX record',`PitchTipsX ${x.sp.name}: ${x.a.w}-${x.a.l}-${x.a.v}, ${fmt(x.a.pl/UNIT)}u (${gbp(x.a.pl)}), ROI ${fmt(x.a.roi,1)}%. Every pick logged.`,BASE,x.blob,`pitchtipsx-${x.sp.file}.png`)})}
+el.querySelectorAll('[data-sum]').forEach(b=>b.onclick=()=>{const x=sumBlobs[+b.dataset.sum];doShare('PitchTipsX record',`PitchTipsX ${x.sp.name}: ${x.a.w}-${x.a.l}-${x.a.v}, ${ptxRecord.unitsPlain(x.a.pl)} (${gbp(x.a.pl)}), ROI ${ptxRecord.roiPlain(x.a.roi)}. Every pick logged.`,BASE,x.blob,`pitchtipsx-${x.sp.file}.png`)})}
 let deferredInstall;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$('install').style.display='inline-block'});
 $('install').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('install').style.display='none'};
 window.addEventListener('offline',()=>{$('live').className='live warn';$('livetxt').textContent='Offline · showing the last saved record'});
 function deep(){const m=location.hash.match(/tip=(\d+)/);if(!m||deep.done===m[1])return;const id=+m[1];const r=bets.find(x=>x._id===id);if(!r)return;deep.done=m[1];
 ['fl','fm','fr','fs'].forEach(i=>$(i).value='');$('q').value='';feed();document.querySelector('nav button[data-t=feed]').click();
 const el=document.querySelector(`#tips .tip[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash')}}
-window.addEventListener('hashchange',()=>{deep.done=null;deep()});
+window.addEventListener('hashchange',()=>{deep.done=null;deep();if(location.hash==='#how')document.querySelector('nav button[data-t=how]').click()});
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['feed','weeks','markets','splits','clv','bank','chal','cards','fix','how'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t))});
+if(location.hash==='#how')document.querySelector('nav button[data-t=how]').click();
 $('q').oninput=()=>{document.querySelectorAll('.preset').forEach(b=>b.classList.remove('on'));feed()};
 document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>preset(b.dataset.p));
 $('mbtn').onclick=()=>{if(isMember()){if(confirm('Leave member view on this device?')){try{localStorage.removeItem(MK)}catch(e){}memberUi();fromCache();refresh()}}else memberOpen()};
