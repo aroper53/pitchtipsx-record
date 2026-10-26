@@ -1,8 +1,8 @@
-// PitchTipsX service worker v13.
+// PitchTipsX service worker v14.
 // Shell + static JSON + tip images: stale-while-revalidate (instant paint, refreshed in background).
 // Google Sheet CSV + football-data proxy: network first with a short timeout, cached copy when slow/offline.
 // Web push is delivered by the alerts worker. This file only displays the payload it sends.
-const CACHE='ptx-shell-v13',DATA='ptx-data-v13',IMG='ptx-img-v13';
+const CACHE='ptx-shell-v14',DATA='ptx-data-v14',IMG='ptx-img-v14';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./tipimg.json','https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{const keep=[CACHE,DATA,IMG];e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>!keep.includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

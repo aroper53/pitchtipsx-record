@@ -1,14 +1,14 @@
 {
- "generated_uk": "2026-10-20 16:45",
+ "generated_uk": "2026-10-26 10:52",
  "true": {
-  "n": 0,
-  "beat_pct": null,
-  "avg_clv_pct": null
+  "n": 6,
+  "beat_pct": 33.3,
+  "avg_clv_pct": 0.59
  },
  "approximate": {
-  "n": 4,
+  "n": 6,
   "beat_pct": 0.0,
-  "avg_clv_pct": -6.3
+  "avg_clv_pct": -4.2
  },
  "rows": [
   {
@@ -62,17 +62,111 @@
    "books": "Ladbrokes, Coral",
    "source": "stored-pricecheck 2026-10-12-coventry-v-newcastle-willock-2-shots (not a true close)",
    "approximate": true
+  },
+  {
+   "pick_id": "2026-10-13|cardiff-vs-watford|cardiff-over-6.5-corners",
+   "date": "2026-10-13",
+   "match": "Cardiff vs Watford",
+   "market": "Team corners",
+   "selection": "Cardiff Over 6.5 corners",
+   "posted": 2.0,
+   "closing": 2.0,
+   "clv_pct": 0.0,
+   "books": "bet365, BOYLE Sports",
+   "source": "pricecheck",
+   "approximate": false
+  },
+  {
+   "pick_id": "2026-10-13|millwall-vs-swansea|jenson-metcalfe-to-be-carded",
+   "date": "2026-10-13",
+   "match": "Millwall vs Swansea",
+   "market": "To be carded",
+   "selection": "Jenson Metcalfe to be carded",
+   "posted": 4.0,
+   "closing": 4.0,
+   "clv_pct": 0.0,
+   "books": "bet365, BetMGM UK",
+   "source": "pricecheck",
+   "approximate": false
+  },
+  {
+   "pick_id": "2026-10-13|atletico-madrid-vs-man-united|bruno-fernandes-to-be-carded",
+   "date": "2026-10-13",
+   "match": "Atletico Madrid vs Man United",
+   "market": "To be carded",
+   "selection": "Bruno Fernandes to be carded",
+   "posted": 5.96,
+   "closing": 5.96,
+   "clv_pct": 0.0,
+   "books": "BetMGM UK",
+   "source": "pricecheck",
+   "approximate": false
+  },
+  {
+   "pick_id": "2026-10-14|man-city-vs-psg|man-city-over-4.5-corners",
+   "date": "2026-10-14",
+   "match": "Man City vs PSG",
+   "market": "Team corners",
+   "selection": "Man City Over 4.5 corners",
+   "posted": 1.73,
+   "closing": 1.73,
+   "clv_pct": 0.0,
+   "books": "Sporting Index, Spreadex",
+   "source": "stored-pricecheck 2026-10-14-man-city-v-psg-city-over-4-5-team-corners (not a true close)",
+   "approximate": true
+  },
+  {
+   "pick_id": "2026-10-14|portsmouth-vs-sheffield-united|portsmouth-over-5.5-corners",
+   "date": "2026-10-14",
+   "match": "Portsmouth vs Sheffield United",
+   "market": "Team corners",
+   "selection": "Portsmouth Over 5.5 corners",
+   "posted": 1.75,
+   "closing": 1.75,
+   "clv_pct": 0.0,
+   "books": "BetAhoy, BetTom, BetGoodwin",
+   "source": "stored-pricecheck 2026-10-14-portsmouth-v-sheff-utd-pompey-over-5-5-team-corners (not a true close)",
+   "approximate": true
+  },
+  {
+   "pick_id": "2026-10-24|west-ham-vs-southampton|west-ham-to-win",
+   "date": "2026-10-24",
+   "match": "West Ham vs Southampton",
+   "market": "Match Result",
+   "selection": "West Ham to win",
+   "posted": 1.74,
+   "closing": 1.7,
+   "clv_pct": 2.35,
+   "books": "Betfred",
+   "source": "pricecheck",
+   "approximate": false
+  },
+  {
+   "pick_id": "2026-10-24|cardiff-city-vs-birmingham-city|birmingham-to-win",
+   "date": "2026-10-24",
+   "match": "Cardiff City vs Birmingham City",
+   "market": "Match Result",
+   "selection": "Birmingham to win",
+   "posted": 2.45,
+   "closing": 2.45,
+   "clv_pct": 0.0,
+   "books": "bet365, Coral, Ladbrokes",
+   "source": "pricecheck",
+   "approximate": false
+  },
+  {
+   "pick_id": "2026-10-25|barcelona-vs-real-madrid|barcelona-to-win",
+   "date": "2026-10-25",
+   "match": "Barcelona vs Real Madrid",
+   "market": "Match Result",
+   "selection": "Barcelona to win",
+   "posted": 1.68,
+   "closing": 1.66,
+   "clv_pct": 1.2,
+   "books": "IvyBet",
+   "source": "pricecheck",
+   "approximate": false
   }
  ],
- "note": "CLV % = posted / closing \u2212 1. Close = best UK bookmaker price shortly before kickoff. Approximate rows are kept for the audit trail and are not part of the headline.",
- "backfill": {
-  "checked_uk": "2026-10-20 16:45",
-  "sources": [
-   "clv.json",
-   "Bets tracker columns and notes"
-  ],
-  "true_closes_matched": 0,
-  "approximate_rows_excluded": 4,
-  "rule": "A close counts only when it is a recorded pre-kickoff price and approximate is not true. Reconstructed football-data closes and earlier price checks are excluded. Nothing is estimated."
- }
+ "note": "CLV % = posted / closing − 1. Close = best UK bookmaker price shortly before kickoff."
 }
